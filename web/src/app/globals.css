@@ -1,0 +1,23 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-brand-dark text-white antialiased;
+}
+
+.ad-slot {
+  @apply flex min-h-[90px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-brand-card/60 text-sm text-brand-muted;
+}
+
+.ad-slot-native {
+  @apply min-h-[250px];
+}
+
+.glass {
+  @apply border border-white/10 bg-white/5 backdrop-blur-md;
+}

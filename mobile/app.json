@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "NicaFlix",
+    "slug": "nicaflix",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "nicaflix",
+    "userInterfaceStyle": "dark",
+    "icon": "./assets/logo.png",
+    "splash": {
+      "image": "./assets/logo.png",
+      "backgroundColor": "#0B0B0F"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nicaflix.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0B0F"
+      },
+      "package": "com.nicaflix.app"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
