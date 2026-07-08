@@ -1,4 +1,4 @@
-import type { LiveChannel, SportEvent } from "../../../shared/types";
+import type { LiveChannel, SportEvent } from "@/types/content";
 
 const COUNTRY_PLAYLISTS = [
   { code: "ni", pais: "Nicaragua" },

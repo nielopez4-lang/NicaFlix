@@ -1,4 +1,4 @@
-import type { ContentItem } from "../../../shared/types";
+import type { ContentItem } from "@/types/content";
 
 type ArchiveDoc = {
   identifier: string;
