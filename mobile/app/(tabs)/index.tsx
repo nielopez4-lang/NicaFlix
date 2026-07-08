@@ -1,4 +1,5 @@
 import { AdGateModal } from "@/components/AdGateModal";
+import { AdBannerSlot } from "@/components/AdBannerSlot";
 import { loadCatalog } from "@/lib/content";
 import { activarPase24h } from "@/lib/verificarAcceso";
 import type { ContentItem } from "@/lib/content";
@@ -15,7 +16,11 @@ import {
 } from "react-native";
 
 const categorias = [
-  { key: "peliculas", label: "Películas" },
+  { key: "accion", label: "Acción" },
+  { key: "comedia", label: "Comedia" },
+  { key: "familia", label: "Familia" },
+  { key: "terror", label: "Terror" },
+  { key: "peliculas", label: "Películas clásicas" },
   { key: "series", label: "Series" },
   { key: "anime", label: "Anime" },
   { key: "kids", label: "Zona Infantil" },
@@ -57,7 +62,7 @@ export default function InicioScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#E50914" />
-        <Text style={styles.loadingText}>Cargando catálogo...</Text>
+        <Text style={styles.loadingText}>Cargando catálogo FilmRise...</Text>
       </View>
     );
   }
@@ -65,29 +70,30 @@ export default function InicioScreen() {
   return (
     <>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Image source={require("../../assets/logo.png")} style={styles.logo} />
+        <Image source={require("../../assets/logo.jpg")} style={styles.logo} />
+        <AdBannerSlot height={120} slot="HOME_TOP" style={styles.topAd} />
         {categorias.map(({ key, label }) => {
           const items = catalogo.filter((i) => i.categoria === key);
+          if (!items.length) return null;
           return (
             <View key={key} style={styles.row}>
               <Text style={styles.rowTitle}>{label}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {items.length === 0 ? (
-                  <Text style={styles.empty}>Conecta la web API para cargar {label.toLowerCase()}</Text>
-                ) : (
-                  items.map((item) => (
-                    <Pressable
-                      key={item.id}
-                      onPress={() => abrirItem(item.id, key === "kids")}
-                      style={styles.card}
-                    >
-                      <Image source={{ uri: item.portada }} style={styles.cover} />
-                      <Text style={styles.cardTitle} numberOfLines={2}>
-                        {item.titulo}
-                      </Text>
-                    </Pressable>
-                  ))
-                )}
+                {items.map((item) => (
+                  <Pressable
+                    key={item.id}
+                    onPress={() => abrirItem(item.id, key === "kids")}
+                    style={styles.card}
+                  >
+                    <Image source={{ uri: item.portada }} style={styles.cover} />
+                    <Text style={styles.cardTitle} numberOfLines={2}>
+                      {item.titulo}
+                    </Text>
+                    {item.fuente === "filmrise" && item.anio ? (
+                      <Text style={styles.cardMeta}>FilmRise · {item.anio}</Text>
+                    ) : null}
+                  </Pressable>
+                ))}
               </ScrollView>
             </View>
           );
@@ -104,10 +110,11 @@ const styles = StyleSheet.create({
   center: { flex: 1, backgroundColor: "#0B0B0F", alignItems: "center", justifyContent: "center" },
   loadingText: { color: "#8B8B9A", marginTop: 12 },
   logo: { width: 72, height: 72, borderRadius: 16, marginBottom: 16, alignSelf: "center" },
+  topAd: { marginBottom: 16 },
   row: { marginBottom: 24 },
   rowTitle: { color: "#fff", fontSize: 18, fontWeight: "700", marginBottom: 12 },
   card: { width: 140, marginRight: 12 },
   cover: { width: 140, height: 200, borderRadius: 12, backgroundColor: "#222" },
   cardTitle: { color: "#ccc", fontSize: 12, marginTop: 8 },
-  empty: { color: "#8B8B9A", padding: 16 },
+  cardMeta: { color: "#8B8B9A", fontSize: 10, marginTop: 4 },
 });

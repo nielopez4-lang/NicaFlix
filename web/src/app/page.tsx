@@ -1,24 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AdSlot } from "@/components/AdSlot";
 import { DownloadButtons } from "@/components/DownloadButtons";
-import { NativeAdSlot } from "@/components/MonetagScript";
 import { CatalogPreview } from "@/components/CatalogPreview";
 import { LivePreview } from "@/components/LivePreview";
 
 export const dynamic = "force-dynamic";
 
 const features = [
-  { title: "Inicio", desc: "Películas, series, anime y zona infantil." },
+  { title: "Acción y más", desc: "FilmRise Movies: acción, comedia, familia y terror." },
   { title: "En Vivo", desc: "Canales de TV de Latinoamérica y EE.UU. (iptv-org)." },
   { title: "Deportes", desc: "Canales deportivos incl. MLB Strike Zone y más." },
-  { title: "Gratis", desc: "Sin suscripción — monetización solo con anuncios." },
 ];
 
 export default function HomePage() {
   return (
     <main>
       <div className="mx-auto max-w-6xl px-4 pt-6">
-        <NativeAdSlot id="ad-top-banner" label="Banner superior" />
+        <AdSlot slot="HOME_TOP" />
       </div>
 
       <section className="relative overflow-hidden bg-hero-glow">
@@ -39,8 +38,8 @@ export default function HomePage() {
               Películas, series, en vivo y deportes
             </h1>
             <p className="mt-5 max-w-xl text-lg text-brand-muted">
-              100% gratis. Catálogo cargado desde Internet Archive, anime
-              popular y canales en vivo de código abierto.
+              100% gratis. Películas FilmRise por categoría (acción, comedia,
+              familia, terror), Internet Archive, anime y TV en vivo.
             </p>
             <div id="descargar" className="mt-8">
               <DownloadButtons />
@@ -70,10 +69,11 @@ export default function HomePage() {
       </section>
 
       <div className="mx-auto max-w-6xl px-4 py-4">
-        <NativeAdSlot id="ad-native-mid" label="Anuncio nativo" />
+        <AdSlot slot="HOME_MID" />
       </div>
 
       <CatalogPreview />
+
       <LivePreview />
 
       <section id="contenido" className="mx-auto max-w-6xl px-4 py-16">
@@ -85,11 +85,12 @@ export default function HomePage() {
               <p className="mt-2 text-brand-muted">{f.desc}</p>
             </article>
           ))}
+          <AdSlot slot="HOME_FEATURE" minHeight={280} />
         </div>
       </section>
 
       <div className="mx-auto max-w-6xl px-4 pb-16">
-        <NativeAdSlot id="ad-bottom-banner" label="Banner inferior" />
+        <AdSlot slot="HOME_BOTTOM" minHeight={280} />
       </div>
     </main>
   );

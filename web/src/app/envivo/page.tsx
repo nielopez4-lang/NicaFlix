@@ -1,5 +1,5 @@
 import { fetchLiveChannels } from "@/lib/iptv";
-import { NativeAdSlot } from "@/components/MonetagScript";
+import { AdSlot } from "@/components/AdSlot";
 import Link from "next/link";
 
 export default async function EnVivoPage() {
@@ -16,7 +16,7 @@ export default async function EnVivoPage() {
         Canales de código abierto (iptv-org) — Nicaragua, México, Centroamérica y más
       </p>
 
-      <NativeAdSlot id="ad-envivo-top" label="Anuncio en vivo" className="my-8" />
+      <AdSlot slot="ENVIVO_TOP" className="my-8" />
 
       {Object.entries(byCountry).map(([pais, channels]) => (
         <section key={pais} className="mb-10">

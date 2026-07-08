@@ -1,34 +1,26 @@
-import { fetchArchiveCatalog, fetchJikanAnime } from "@/lib/archive";
-import { NativeAdSlot } from "@/components/MonetagScript";
+import { fetchFullCatalog } from "@/lib/catalog";
+import { CATALOG_LABELS, CATALOG_ORDER } from "@/lib/catalog-labels";
+import { AdSlot } from "@/components/AdSlot";
 import Image from "next/image";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-const labels: Record<string, string> = {
-  peliculas: "Películas",
-  series: "Series",
-  anime: "Anime",
-  kids: "Zona Infantil",
-};
-
 export default async function CatalogoPage() {
-  const [archive, anime] = await Promise.all([
-    fetchArchiveCatalog(),
-    fetchJikanAnime(),
-  ]);
-  const catalogo = [...archive, ...anime];
+  const catalogo = await fetchFullCatalog();
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="text-4xl font-bold">Catálogo completo</h1>
       <p className="mt-2 text-brand-muted">
-        {catalogo.length} títulos — Internet Archive + anime (Jikan)
+        {catalogo.length} títulos — FilmRise (YouTube), Internet Archive y
+        anime
       </p>
 
-      <NativeAdSlot id="ad-catalog-top" label="Anuncio catálogo" className="my-8" />
+      <AdSlot slot="CATALOG_TOP" className="my-8" />
 
-      {Object.entries(labels).map(([key, label]) => {
+      {CATALOG_ORDER.map((key) => {
+        const label = CATALOG_LABELS[key];
         const items = catalogo.filter((c) => c.categoria === key);
         if (!items.length) return null;
         return (
@@ -46,6 +38,9 @@ export default async function CatalogoPage() {
                     unoptimized
                   />
                   <p className="mt-2 line-clamp-2 text-sm">{item.titulo}</p>
+                  {item.fuente === "filmrise" && (
+                    <p className="text-xs text-brand-muted">FilmRise · {item.anio}</p>
+                  )}
                 </Link>
               ))}
             </div>

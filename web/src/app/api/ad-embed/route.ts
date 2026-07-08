@@ -1,0 +1,33 @@
+import {
+  DIRECT_LINK_URL,
+  buildBannerAdHtml,
+  getInvokeScriptUrl,
+  resolveZoneId,
+} from "@/lib/monetag-config";
+
+export const dynamic = "force-dynamic";
+
+/** HTML embebible — In-Page Push banner dentro de cada iframe/cuadro. */
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const zoneId = resolveZoneId(searchParams.get("zone"));
+  const minHeight = Math.max(
+    90,
+    Number.parseInt(searchParams.get("h") ?? "250", 10) || 250,
+  );
+  const invokeUrl = zoneId ? getInvokeScriptUrl(zoneId) : "";
+
+  const body =
+    zoneId && invokeUrl
+      ? buildBannerAdHtml(zoneId, invokeUrl, minHeight)
+      : DIRECT_LINK_URL
+        ? `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><style>html,body{margin:0;height:100%;min-height:${minHeight}px;background:#0f0f14}iframe{border:0;width:100%;height:100%;min-height:${minHeight}px}</style></head><body><iframe src="${DIRECT_LINK_URL}"></iframe></body></html>`
+        : `<!DOCTYPE html><html><body style="background:#0f0f14;min-height:${minHeight}px"></body></html>`;
+
+  return new Response(body, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
+}

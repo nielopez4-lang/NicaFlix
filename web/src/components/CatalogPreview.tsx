@@ -1,23 +1,12 @@
-import { fetchArchiveCatalog, fetchJikanAnime } from "@/lib/archive";
+import { fetchFullCatalog } from "@/lib/catalog";
+import { CATALOG_LABELS, CATALOG_ORDER } from "@/lib/catalog-labels";
 import Image from "next/image";
 import Link from "next/link";
 
-const labels: Record<string, string> = {
-  peliculas: "Películas",
-  series: "Series",
-  anime: "Anime",
-  kids: "Zona Infantil",
-};
-
 export async function CatalogPreview() {
-  const [archive, anime] = await Promise.all([
-    fetchArchiveCatalog(),
-    fetchJikanAnime(),
-  ]);
-  const catalogo = [...archive, ...anime];
-  const data = { catalogo };
+  const catalogo = await fetchFullCatalog();
 
-  if (!data.catalogo.length) {
+  if (!catalogo.length) {
     return (
       <section className="mx-auto max-w-6xl px-4 py-12">
         <p className="text-brand-muted">Catálogo se carga al iniciar el servidor...</p>
@@ -25,12 +14,10 @@ export async function CatalogPreview() {
     );
   }
 
-  const grouped = Object.keys(labels).map((key) => ({
+  const grouped = CATALOG_ORDER.map((key) => ({
     key,
-    label: labels[key],
-    items: data.catalogo.filter(
-      (c: { categoria: string }) => c.categoria === key,
-    ),
+    label: CATALOG_LABELS[key],
+    items: catalogo.filter((c) => c.categoria === key),
   }));
 
   return (
@@ -47,31 +34,25 @@ export async function CatalogPreview() {
             <div key={key} className="mb-10">
               <h3 className="mb-4 text-lg text-brand-muted">{label}</h3>
               <div className="flex gap-3 overflow-x-auto pb-2">
-                {items.slice(0, 12).map(
-                  (item: {
-                    id: string;
-                    titulo: string;
-                    portada: string;
-                  }) => (
-                    <Link
-                      key={item.id}
-                      href={`/ver/${item.id}`}
-                      className="w-36 shrink-0"
-                    >
-                      <Image
-                        src={item.portada}
-                        alt={item.titulo}
-                        width={144}
-                        height={200}
-                        className="h-48 w-36 rounded-xl object-cover"
-                        unoptimized
-                      />
-                      <p className="mt-2 line-clamp-2 text-xs text-brand-muted">
-                        {item.titulo}
-                      </p>
-                    </Link>
-                  ),
-                )}
+                {items.slice(0, 12).map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/ver/${item.id}`}
+                    className="w-36 shrink-0"
+                  >
+                    <Image
+                      src={item.portada}
+                      alt={item.titulo}
+                      width={144}
+                      height={200}
+                      className="h-48 w-36 rounded-xl object-cover"
+                      unoptimized
+                    />
+                    <p className="mt-2 line-clamp-2 text-xs text-brand-muted">
+                      {item.titulo}
+                    </p>
+                  </Link>
+                ))}
               </div>
             </div>
           ),

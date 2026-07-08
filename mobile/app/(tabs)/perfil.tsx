@@ -1,18 +1,19 @@
+import { MONETAG_ENABLED, getAdGateUrl } from "@/lib/monetag";
 import { Linking, Pressable, StyleSheet, Text, View, Image } from "react-native";
 
 const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? "https://web-five-plum-og6kinpc9v.vercel.app";
-const MONETAG_LINK = process.env.EXPO_PUBLIC_MONETAG_DIRECT_LINK;
 
 export default function PerfilScreen() {
   return (
     <View style={styles.container}>
-      <Image source={require("../../assets/logo.png")} style={styles.logo} />
+      <Image source={require("../../assets/logo.jpg")} style={styles.logo} />
       <Text style={styles.title}>NicaFlix</Text>
       <Text style={styles.sub}>v1.0.0 · 100% gratis</Text>
 
       <View style={styles.card}>
         <Text style={styles.cardText}>
-          Monetización con Monetag. Películas, anime, TV en vivo y deportes.
+          FilmRise Movies, TV en vivo, deportes y anime. Anuncios Monetag antes
+          de reproducir contenido.
         </Text>
       </View>
 
@@ -27,13 +28,11 @@ export default function PerfilScreen() {
         <Text style={styles.btnSecondaryText}>Compartir app</Text>
       </Pressable>
 
-      {MONETAG_LINK ? (
-        <Text style={styles.hint}>Monetag Direct Link configurado ✓</Text>
-      ) : (
-        <Text style={styles.hint}>
-          Configura EXPO_PUBLIC_MONETAG_DIRECT_LINK en .env
-        </Text>
-      )}
+      <Text style={styles.hint}>
+        {MONETAG_ENABLED
+          ? "Monetag configurado ✓"
+          : `Anuncios vía web: ${getAdGateUrl()}`}
+      </Text>
     </View>
   );
 }

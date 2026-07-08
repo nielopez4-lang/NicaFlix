@@ -15,7 +15,11 @@ body {
 }
 
 .ad-slot-native {
-  @apply min-h-[250px];
+  @apply min-h-[250px] w-full;
+}
+
+.ad-container iframe {
+  @apply w-full rounded-2xl;
 }
 
 .glass {

@@ -1,44 +1,44 @@
 "use client";
 
-import Script from "next/script";
+import AdContainer from "@/components/AdContainer";
+import { MONETAG_ZONES, type MonetagZoneKey } from "@/lib/monetag-config";
 
-const ZONE_ID = process.env.NEXT_PUBLIC_MONETAG_ZONE_ID;
+const SLOT_KEYS: Record<string, MonetagZoneKey> = {
+  "ad-top-banner": "HOME_TOP",
+  "ad-native-mid": "HOME_MID",
+  "ad-home-feature": "HOME_FEATURE",
+  "ad-bottom-banner": "HOME_BOTTOM",
+  "ad-deportes-mid": "DEPORTES_MID",
+  "ad-catalog-top": "CATALOG_TOP",
+  "ad-envivo-top": "ENVIVO_TOP",
+  "ad-player-bottom": "PLAYER_BOTTOM",
+  "ad-adgate-top": "ADGATE_TOP",
+  "ad-adgate-mid": "ADGATE_MID",
+  "ad-adgate-bottom": "ADGATE_BOTTOM",
+};
 
-export function MonetagScript() {
-  if (!ZONE_ID) return null;
-
-  return (
-    <Script
-      id="monetag-multitag"
-      src={`https://s.monetag.com/tag/${ZONE_ID}.js`}
-      strategy="afterInteractive"
-      data-cfasync="false"
-    />
-  );
-}
-
+/** @deprecated Usar `<AdSlot slot="..." />` o `<AdContainer zoneId="..." />` */
 export function NativeAdSlot({
   id,
-  label,
+  label: _label,
   className = "",
+  tall = false,
 }: {
   id: string;
   label: string;
   className?: string;
+  tall?: boolean;
 }) {
+  const key = SLOT_KEYS[id];
+  const zoneId = key ? MONETAG_ZONES[key] : "";
+
   return (
-    <div
-      id={id}
-      className={`ad-slot ad-slot-native ${className}`}
-      data-ad-zone={id}
-      aria-label={label}
-    >
-      {!ZONE_ID && (
-        <span>
-          Anuncio nativo — configura{" "}
-          <code>NEXT_PUBLIC_MONETAG_ZONE_ID</code> en Vercel (ver MONETAG.md)
-        </span>
-      )}
-    </div>
+    <AdContainer
+      zoneId={zoneId}
+      className={className}
+      minHeight={tall ? 280 : 250}
+    />
   );
 }
+
+export { AdContainer, MONETAG_ZONES };
