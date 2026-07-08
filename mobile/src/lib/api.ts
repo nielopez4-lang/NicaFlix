@@ -1,7 +1,8 @@
 import type { CatalogResponse, LiveResponse } from "@/types/content";
+import { getExpoEnv } from "@/lib/env";
 
 const API_BASE =
-  process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
+  getExpoEnv("EXPO_PUBLIC_API_URL") || "http://localhost:3000";
 
 export async function fetchCatalog(): Promise<CatalogResponse> {
   const res = await fetch(`${API_BASE}/api/catalog`);

@@ -1,28 +1,29 @@
-/** Zone IDs para banners móviles (mismas env que web en eas.json) */
-function zone(...keys: (string | undefined)[]): string {
-  for (const k of keys) {
-    const v = k?.trim();
-    if (v) return v;
+import { getExpoEnv, getExpoEnvFirst } from "@/lib/env";
+
+/** Zone IDs para banners móviles */
+function zone(...keys: string[]): string {
+  for (const key of keys) {
+    const value = getExpoEnv(key);
+    if (value) return value;
   }
-  return (
-    process.env.EXPO_PUBLIC_MONETAG_ZONE_BANNER?.trim() ||
-    process.env.EXPO_PUBLIC_MONETAG_ZONE_ID?.trim() ||
-    ""
+  return getExpoEnvFirst(
+    "EXPO_PUBLIC_MONETAG_ZONE_BANNER",
+    "EXPO_PUBLIC_MONETAG_ZONE_ID",
   );
 }
 
 export const MONETAG_ZONES = {
-  HOME_TOP: zone(process.env.EXPO_PUBLIC_MONETAG_ZONE_HOME_TOP),
-  HOME_MID: zone(process.env.EXPO_PUBLIC_MONETAG_ZONE_HOME_MID),
+  HOME_TOP: zone("EXPO_PUBLIC_MONETAG_ZONE_HOME_TOP"),
+  HOME_MID: zone("EXPO_PUBLIC_MONETAG_ZONE_HOME_MID"),
   DEPORTES_MID: zone(
-    process.env.EXPO_PUBLIC_MONETAG_ZONE_DEPORTES,
-    process.env.EXPO_PUBLIC_MONETAG_ZONE_DEPORTES_MID,
+    "EXPO_PUBLIC_MONETAG_ZONE_DEPORTES_MID",
+    "EXPO_PUBLIC_MONETAG_ZONE_DEPORTES",
   ),
   DEPORTES_TOP: zone(
-    process.env.EXPO_PUBLIC_MONETAG_ZONE_DEPORTES_TOP,
-    process.env.EXPO_PUBLIC_MONETAG_ZONE_DEPORTES,
+    "EXPO_PUBLIC_MONETAG_ZONE_DEPORTES_TOP",
+    "EXPO_PUBLIC_MONETAG_ZONE_DEPORTES",
   ),
-  CATALOG_TOP: zone(process.env.EXPO_PUBLIC_MONETAG_ZONE_CATALOG),
+  CATALOG_TOP: zone("EXPO_PUBLIC_MONETAG_ZONE_CATALOG"),
 } as const;
 
 export type MonetagZoneKey = keyof typeof MONETAG_ZONES;

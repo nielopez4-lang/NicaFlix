@@ -1,7 +1,4 @@
-import { MONETAG_ENABLED, getAdGateUrl } from "@/lib/monetag";
-import { Linking, Pressable, StyleSheet, Text, View, Image } from "react-native";
-
-const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? "https://web-five-plum-og6kinpc9v.vercel.app";
+import { MONETAG_ENABLED, WEB_URL, getAdGateUrl } from "@/lib/monetag";
 
 export default function PerfilScreen() {
   return (

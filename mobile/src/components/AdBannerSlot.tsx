@@ -4,9 +4,7 @@ import { MONETAG_ZONES, type MonetagZoneKey } from "@/lib/monetag-zones";
 import { StyleSheet, View, type ViewStyle } from "react-native";
 import { WebView } from "react-native-webview";
 
-const WEB_URL =
-  process.env.EXPO_PUBLIC_WEB_URL ??
-  "https://web-five-plum-og6kinpc9v.vercel.app";
+import { WEB_URL } from "@/lib/monetag";
 
 type Props = {
   height?: number;

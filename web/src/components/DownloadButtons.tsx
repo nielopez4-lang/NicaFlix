@@ -1,5 +1,7 @@
-const ANDROID_URL = process.env.NEXT_PUBLIC_ANDROID_APK_URL ?? "#descargar-android";
-const IOS_URL = process.env.NEXT_PUBLIC_IOS_APP_URL ?? "#descargar-ios";
+import { ANDROID_APK_URL, IOS_APP_URL } from "@/lib/monetag-config";
+
+const ANDROID_URL = ANDROID_APK_URL || "#descargar-android";
+const IOS_URL = IOS_APP_URL || "#descargar-ios";
 
 export function DownloadButtons({ size = "lg" }: { size?: "lg" | "sm" }) {
   const btnClass =
