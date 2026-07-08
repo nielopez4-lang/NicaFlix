@@ -1,32 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import Script from "next/script";
 
-declare global {
-  interface Window {
-    monetag?: {
-      display: (zoneId: string, elementId: string) => void;
-    };
-  }
-}
-
-const MONETAG_SITE_ID = process.env.NEXT_PUBLIC_MONETAG_SITE_ID;
+const ZONE_ID = process.env.NEXT_PUBLIC_MONETAG_ZONE_ID;
 
 export function MonetagScript() {
-  useEffect(() => {
-    if (!MONETAG_SITE_ID) return;
+  if (!ZONE_ID) return null;
 
-    const script = document.createElement("script");
-    script.src = `https://cdn.monetag.com/${MONETAG_SITE_ID}.js`;
-    script.async = true;
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
-  return null;
+  return (
+    <Script
+      id="monetag-multitag"
+      src={`https://s.monetag.com/tag/${ZONE_ID}.js`}
+      strategy="afterInteractive"
+      data-cfasync="false"
+    />
+  );
 }
 
 export function NativeAdSlot({
@@ -38,11 +26,6 @@ export function NativeAdSlot({
   label: string;
   className?: string;
 }) {
-  useEffect(() => {
-    if (!MONETAG_SITE_ID || !window.monetag) return;
-    window.monetag.display(MONETAG_SITE_ID, id);
-  }, [id]);
-
   return (
     <div
       id={id}
@@ -50,9 +33,10 @@ export function NativeAdSlot({
       data-ad-zone={id}
       aria-label={label}
     >
-      {!MONETAG_SITE_ID && (
+      {!ZONE_ID && (
         <span>
-          Slot de anuncio nativo — configura <code>NEXT_PUBLIC_MONETAG_SITE_ID</code>
+          Anuncio nativo — configura{" "}
+          <code>NEXT_PUBLIC_MONETAG_ZONE_ID</code> en Vercel (ver MONETAG.md)
         </span>
       )}
     </div>

@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "NicaFlix — Películas, Series, En Vivo y Deportes",
   description:
-    "Descarga NicaFlix para Android e iOS. Streaming de películas, series, anime, TV en vivo y deportes. Plan Pro sin anuncios.",
+    "Descarga NicaFlix para Android. Streaming gratis de películas, series, anime, TV en vivo y deportes.",
   keywords: [
     "NicaFlix",
     "streaming",
@@ -19,7 +19,6 @@ export const metadata: Metadata = {
     "TV en vivo",
     "deportes",
     "Android",
-    "iOS",
   ],
   openGraph: {
     title: "NicaFlix — Tu streaming en un solo lugar",
@@ -27,6 +26,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_LA",
   },
+  other: process.env.NEXT_PUBLIC_MONETAG_VERIFY
+    ? { monetag: process.env.NEXT_PUBLIC_MONETAG_VERIFY }
+    : undefined,
 };
 
 export default function RootLayout({

@@ -5,7 +5,9 @@
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
-    "ios": "expo start --ios"
+    "ios": "expo start --ios",
+    "build:apk": "eas build --platform android --profile production",
+    "build:apk:preview": "eas build --platform android --profile preview"
   },
   "dependencies": {
     "expo": "~52.0.0",
@@ -22,7 +24,8 @@
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "@types/react": "~18.3.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "eas-cli": "^16.0.0"
   },
   "private": true
 }

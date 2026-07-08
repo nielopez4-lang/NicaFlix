@@ -9,6 +9,7 @@
     "icon": "./assets/logo.png",
     "splash": {
       "image": "./assets/logo.png",
+      "resizeMode": "contain",
       "backgroundColor": "#0B0B0F"
     },
     "ios": {
@@ -17,9 +18,15 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#0B0B0F"
       },
-      "package": "com.nicaflix.app"
+      "package": "com.nicaflix.app",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "plugins": ["expo-router"],
     "experiments": {

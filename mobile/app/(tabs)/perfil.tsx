@@ -1,19 +1,18 @@
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
-import { Image } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View, Image } from "react-native";
 
-const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? "http://localhost:3000";
+const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? "https://web-five-plum-og6kinpc9v.vercel.app";
+const MONETAG_LINK = process.env.EXPO_PUBLIC_MONETAG_DIRECT_LINK;
 
 export default function PerfilScreen() {
   return (
     <View style={styles.container}>
       <Image source={require("../../assets/logo.png")} style={styles.logo} />
       <Text style={styles.title}>NicaFlix</Text>
-      <Text style={styles.sub}>100% gratis — sin suscripción</Text>
+      <Text style={styles.sub}>v1.0.0 · 100% gratis</Text>
 
       <View style={styles.card}>
         <Text style={styles.cardText}>
-          Monetización solo con anuncios (Monetag). Películas de Internet Archive,
-          anime popular y TV en vivo de fuentes abiertas.
+          Monetización con Monetag. Películas, anime, TV en vivo y deportes.
         </Text>
       </View>
 
@@ -25,8 +24,16 @@ export default function PerfilScreen() {
         style={styles.btnSecondary}
         onPress={() => Linking.openURL(`${WEB_URL}/#descargar`)}
       >
-        <Text style={styles.btnSecondaryText}>Compartir / descargar app</Text>
+        <Text style={styles.btnSecondaryText}>Compartir app</Text>
       </Pressable>
+
+      {MONETAG_LINK ? (
+        <Text style={styles.hint}>Monetag Direct Link configurado ✓</Text>
+      ) : (
+        <Text style={styles.hint}>
+          Configura EXPO_PUBLIC_MONETAG_DIRECT_LINK en .env
+        </Text>
+      )}
     </View>
   );
 }
@@ -42,4 +49,5 @@ const styles = StyleSheet.create({
   btnText: { color: "#fff", textAlign: "center", fontWeight: "700" },
   btnSecondary: { borderWidth: 1, borderColor: "#444", padding: 16, borderRadius: 12, marginTop: 12, width: "100%" },
   btnSecondaryText: { color: "#fff", textAlign: "center" },
+  hint: { color: "#666", fontSize: 11, marginTop: 16, textAlign: "center" },
 });
