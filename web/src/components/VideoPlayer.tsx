@@ -1,5 +1,8 @@
 "use client";
 
+import { CastToTvButton } from "@/components/CastToTvButton";
+import { useRef } from "react";
+
 type Props = {
   streamUrl?: string;
   youtubeId?: string;
@@ -7,27 +10,43 @@ type Props = {
 };
 
 export function VideoPlayer({ streamUrl, youtubeId, titulo }: Props) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   if (youtubeId) {
     return (
-      <iframe
-        title={titulo}
-        src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&modestbranding=1&rel=0`}
-        className="aspect-video w-full"
-        allowFullScreen
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      />
+      <div className="relative aspect-video w-full">
+        <CastToTvButton titulo={titulo} youtubeId={youtubeId} visible />
+        <iframe
+          title={titulo}
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&modestbranding=1&rel=0`}
+          className="aspect-video w-full"
+          allowFullScreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        />
+      </div>
     );
   }
 
   if (streamUrl) {
     return (
-      <video
-        controls
-        playsInline
-        className="aspect-video w-full bg-black"
-        src={streamUrl}
-        title={titulo}
-      />
+      <div className="relative aspect-video w-full">
+        <CastToTvButton
+          titulo={titulo}
+          streamUrl={streamUrl}
+          videoRef={videoRef}
+          visible
+        />
+        <video
+          ref={videoRef}
+          controls
+          playsInline
+          disableRemotePlayback={false}
+          x-webkit-airplay="allow"
+          className="aspect-video w-full bg-black"
+          src={streamUrl}
+          title={titulo}
+        />
+      </div>
     );
   }
 

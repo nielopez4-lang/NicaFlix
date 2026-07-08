@@ -13,6 +13,7 @@ export function YouTubePlayer({ youtubeId }: Props) {
       <WebView
         source={{ uri: embedUrl }}
         allowsFullscreenVideo
+        allowsAirPlayForMediaPlayback
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled
         domStorageEnabled

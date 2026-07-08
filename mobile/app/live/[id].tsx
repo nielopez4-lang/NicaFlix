@@ -1,4 +1,5 @@
 import { AdGateModal } from "@/components/AdGateModal";
+import { CastToTvButton } from "@/components/CastToTvButton";
 import { LicensedStreamPlayer } from "@/components/LicensedStreamPlayer";
 import { findChannel } from "@/lib/content";
 import { useLocalSearchParams } from "expo-router";
@@ -38,7 +39,10 @@ export default function LivePlayerScreen() {
         <AdGateModal visible onClose={() => setAdDone(true)} onSuccess={() => setAdDone(true)} />
       )}
       {adDone && (
-        <LicensedStreamPlayer streamUrl={canal.streamUrl} titulo={canal.nombre} />
+        <View style={styles.playerWrap}>
+          <LicensedStreamPlayer streamUrl={canal.streamUrl} titulo={canal.nombre} />
+          <CastToTvButton titulo={canal.nombre} streamUrl={canal.streamUrl} />
+        </View>
       )}
     </>
   );
@@ -46,5 +50,6 @@ export default function LivePlayerScreen() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" },
+  playerWrap: { flex: 1, position: "relative" },
   error: { color: "#fff" },
 });

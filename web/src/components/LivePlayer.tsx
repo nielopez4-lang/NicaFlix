@@ -1,5 +1,6 @@
 "use client";
 
+import { CastToTvButton } from "@/components/CastToTvButton";
 import { useEffect, useRef } from "react";
 
 type Props = { streamUrl: string; titulo: string };
@@ -31,24 +32,37 @@ export function LivePlayer({ streamUrl, titulo }: Props) {
 
   if (isPageUrl) {
     return (
-      <iframe
-        title={titulo}
-        src={streamUrl}
-        className="aspect-video w-full rounded-2xl bg-black"
-        allowFullScreen
-      />
+      <div className="relative aspect-video w-full">
+        <CastToTvButton titulo={titulo} streamUrl={streamUrl} visible />
+        <iframe
+          title={titulo}
+          src={streamUrl}
+          className="aspect-video w-full rounded-2xl bg-black"
+          allowFullScreen
+        />
+      </div>
     );
   }
 
   return (
-    <video
-      ref={videoRef}
-      controls
-      autoPlay
-      playsInline
-      className="aspect-video w-full rounded-2xl bg-black"
-      src={isHls ? undefined : streamUrl}
-      title={titulo}
-    />
+    <div className="relative aspect-video w-full">
+      <CastToTvButton
+        titulo={titulo}
+        streamUrl={streamUrl}
+        videoRef={videoRef}
+        visible
+      />
+      <video
+        ref={videoRef}
+        controls
+        autoPlay
+        playsInline
+        disableRemotePlayback={false}
+        x-webkit-airplay="allow"
+        className="aspect-video w-full rounded-2xl bg-black"
+        src={isHls ? undefined : streamUrl}
+        title={titulo}
+      />
+    </div>
   );
 }

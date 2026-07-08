@@ -23,7 +23,7 @@ export function LicensedStreamPlayer({ streamUrl, titulo }: Props) {
         </style>
       </head>
       <body>
-        <video controls autoplay playsinline src="${streamUrl}"></video>
+        <video controls autoplay playsinline webkit-playsinline x-webkit-airplay="allow" src="${streamUrl}"></video>
       </body>
     </html>
   `;
@@ -33,6 +33,7 @@ export function LicensedStreamPlayer({ streamUrl, titulo }: Props) {
       <WebView
         source={{ html }}
         allowsFullscreenVideo
+        allowsAirPlayForMediaPlayback
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled
       />

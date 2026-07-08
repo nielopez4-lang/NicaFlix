@@ -1,4 +1,5 @@
 import { findContent } from "@/lib/content";
+import { CastToTvButton } from "@/components/CastToTvButton";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { LicensedStreamPlayer } from "@/components/LicensedStreamPlayer";
 import { useLocalSearchParams } from "expo-router";
@@ -33,11 +34,18 @@ export default function PlayerScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {item.youtubeId ? (
-        <YouTubePlayer youtubeId={item.youtubeId} />
-      ) : item.streamUrl ? (
-        <LicensedStreamPlayer streamUrl={item.streamUrl} titulo={item.titulo} />
-      ) : null}
+      <View style={styles.playerWrap}>
+        {item.youtubeId ? (
+          <YouTubePlayer youtubeId={item.youtubeId} />
+        ) : item.streamUrl ? (
+          <LicensedStreamPlayer streamUrl={item.streamUrl} titulo={item.titulo} />
+        ) : null}
+        <CastToTvButton
+          titulo={item.titulo}
+          youtubeId={item.youtubeId}
+          streamUrl={item.streamUrl}
+        />
+      </View>
       <View style={styles.info}>
         <Text style={styles.title}>{item.titulo}</Text>
         <Text style={styles.sinopsis}>{item.sinopsis}</Text>
@@ -48,6 +56,7 @@ export default function PlayerScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0B0B0F" },
+  playerWrap: { position: "relative" },
   center: { flex: 1, backgroundColor: "#0B0B0F", alignItems: "center", justifyContent: "center" },
   error: { color: "#fff" },
   info: { padding: 16 },
