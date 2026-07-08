@@ -1,6 +1,6 @@
 import { fetchCatalog, fetchLive } from "@/lib/api";
 import { canalesNicaragua, deportesSeed } from "@/lib/seed";
-import type { ContentItem, LiveChannel, SportEvent } from "../../../shared/types";
+import type { ContentItem, LiveChannel, SportEvent } from "@/types/content";
 
 export type { ContentItem, LiveChannel, SportEvent };
 

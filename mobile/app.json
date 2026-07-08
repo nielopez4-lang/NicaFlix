@@ -28,9 +28,22 @@
         "ACCESS_NETWORK_STATE"
       ]
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      "expo-font"
+    ],
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "nielopez4",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "9f829129-e843-4bdd-9e9e-161cc5d80468"
+      }
     }
   }
 }

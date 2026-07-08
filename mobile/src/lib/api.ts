@@ -1,4 +1,4 @@
-import type { CatalogResponse, LiveResponse } from "../../../shared/types";
+import type { CatalogResponse, LiveResponse } from "@/types/content";
 
 const API_BASE =
   process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
