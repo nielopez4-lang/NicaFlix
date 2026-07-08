@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AdBanner } from "@/components/AdBanner";
 import { AdSlot } from "@/components/AdSlot";
 import { DownloadButtons } from "@/components/DownloadButtons";
 import { CatalogPreview } from "@/components/CatalogPreview";
@@ -16,8 +17,8 @@ const features = [
 export default function HomePage() {
   return (
     <main>
-      <div className="mx-auto max-w-6xl px-4 pt-6">
-        <AdSlot slot="HOME_TOP" />
+      <div className="mx-auto max-w-6xl px-4 pt-4">
+        <AdBanner className="mb-4" />
       </div>
 
       <section className="relative overflow-hidden bg-hero-glow">
