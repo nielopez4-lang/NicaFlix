@@ -109,21 +109,22 @@ export function buildBannerAdHtml(
   return buildSlotAdHtml(zone, invokeUrl, DIRECT_LINK_URL, minHeight);
 }
 
-/** HTML para cuadros de anuncio: banner nativo + Direct Link siempre visible. */
+/** HTML para cuadros de anuncio: solo banner nativo Monetag (sin iframe Direct Link). */
 export function buildSlotAdHtml(
   zone: string,
   invokeUrl: string,
   directLinkUrl: string,
   minHeight = 250,
 ): string {
-  const bannerHeight = Math.min(120, Math.floor(minHeight * 0.35));
-  const frameHeight = Math.max(120, minHeight - bannerHeight);
   const invokeTag = invokeUrl
     ? `<script async="async" data-cfasync="false" src="${invokeUrl}"><\/script>`
     : "";
 
-  const directFrame = directLinkUrl
-    ? `<iframe class="ad-frame" src="${directLinkUrl}" title="Publicidad" referrerpolicy="no-referrer-when-downgrade"></iframe>`
+  const fallbackLink = directLinkUrl
+    ? `<a id="ad-fallback" class="ad-fallback" href="${directLinkUrl}" target="_blank" rel="noopener noreferrer sponsored">
+  <span class="ad-fallback-label">Publicidad</span>
+  <span class="ad-fallback-cta">Ver oferta patrocinada →</span>
+</a>`
     : "";
 
   return `<!DOCTYPE html>
@@ -136,25 +137,47 @@ ${invokeTag}
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{min-height:100%;background:#0f0f14}
   #container-${zone}{
-    min-height:${bannerHeight}px;
+    min-height:${minHeight}px;
     width:100%;
     display:flex;
     align-items:center;
     justify-content:center;
   }
-  .ad-frame{
+  .ad-fallback{
+    display:none;
+    min-height:${minHeight}px;
     width:100%;
-    border:0;
-    display:block;
-    min-height:${frameHeight}px;
-    height:${frameHeight}px;
-    background:#0f0f14;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    text-decoration:none;
+    background:linear-gradient(135deg,#1a1a24 0%,#0f0f14 100%);
+    border:1px dashed rgba(255,255,255,0.12);
+    color:#fff;
+    padding:16px;
   }
+  .ad-fallback-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8b8b9a}
+  .ad-fallback-cta{font-size:15px;font-weight:600;color:#e50914}
+  .ad-fallback.visible{display:flex}
 </style>
 </head>
 <body>
   <div id="container-${zone}"></div>
-  ${directFrame}
+  ${fallbackLink}
+  <script>
+    (function(){
+      var zone="${zone}";
+      var fb=document.getElementById("ad-fallback");
+      function showFallback(){
+        if(!fb) return;
+        var c=document.getElementById("container-"+zone);
+        if(c && c.children.length > 0) return;
+        fb.className="ad-fallback visible";
+      }
+      setTimeout(showFallback, 4000);
+    })();
+  <\/script>
 </body>
 </html>`;
 }

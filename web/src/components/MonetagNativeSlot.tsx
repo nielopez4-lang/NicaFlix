@@ -18,9 +18,7 @@ const IFRAME_SANDBOX =
   "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation-by-user-activation";
 
 /**
- * Muestra anuncios Monetag dentro del cuadro:
- * 1) Banner nativo (invoke.js + container) si hay zona configurada
- * 2) Direct Link embebido en iframe como respaldo
+ * Muestra anuncios Monetag dentro del cuadro (banner nativo invoke.js).
  */
 export function MonetagNativeSlot({
   slotId,
@@ -32,7 +30,7 @@ export function MonetagNativeSlot({
   const invokeUrl = getBannerInvokeUrl();
   const height = primary ? minHeight : Math.min(minHeight, 120);
 
-  if (zone && invokeUrl) {
+  if (zone || MONETAG_DIRECT_LINK) {
     const srcDoc = buildSlotAdHtml(
       zone,
       invokeUrl,
@@ -43,21 +41,6 @@ export function MonetagNativeSlot({
       <iframe
         key={slotId}
         srcDoc={srcDoc}
-        title="Publicidad"
-        className={`w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f14] ${className}`}
-        style={{ minHeight: height, height, border: 0 }}
-        sandbox={IFRAME_SANDBOX}
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-      />
-    );
-  }
-
-  if (MONETAG_DIRECT_LINK) {
-    return (
-      <iframe
-        key={slotId}
-        src={MONETAG_DIRECT_LINK}
         title="Publicidad"
         className={`w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f14] ${className}`}
         style={{ minHeight: height, height, border: 0 }}

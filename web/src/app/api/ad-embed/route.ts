@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     zoneId && (invokeUrl || DIRECT_LINK_URL)
       ? buildSlotAdHtml(zoneId, invokeUrl, DIRECT_LINK_URL, minHeight)
       : DIRECT_LINK_URL
-        ? `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><style>html,body{margin:0;height:100%;min-height:${minHeight}px;background:#0f0f14}iframe{border:0;width:100%;height:100%;min-height:${minHeight}px}</style></head><body><iframe src="${DIRECT_LINK_URL}" title="Publicidad"></iframe></body></html>`
+        ? buildSlotAdHtml("", "", DIRECT_LINK_URL, minHeight)
         : `<!DOCTYPE html><html><body style="background:#0f0f14;min-height:${minHeight}px"></body></html>`;
 
   return new Response(body, {

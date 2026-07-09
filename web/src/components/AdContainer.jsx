@@ -11,8 +11,7 @@ const IFRAME_SANDBOX =
   "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation-by-user-activation allow-modals";
 
 /**
- * Cuadro de anuncio Monetag.
- * Carga banner nativo (invoke.js) y Direct Link en el mismo espacio para evitar cajas vacías.
+ * Cuadro de anuncio Monetag — banner nativo (invoke.js). Sin iframe Direct Link (evita captcha AdEx).
  *
  * @param {{ zoneId: string, className?: string, minHeight?: number, slotKey?: string }} props
  */
