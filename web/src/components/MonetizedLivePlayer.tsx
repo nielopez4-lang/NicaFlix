@@ -3,7 +3,7 @@
 import { CastToTvButton } from "@/components/CastToTvButton";
 import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
 import { useLiveAdTriggers } from "@/hooks/useLiveAdTriggers";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 type Props = { streamUrl: string; titulo: string };
 
@@ -20,41 +20,31 @@ export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
     requestPreroll,
     completeGate,
     consumePendingStart,
-    consumePendingResume,
   } = useLiveAdTriggers();
-
-  const pausePlayback = useCallback(() => {
-    videoRef.current?.pause();
-  }, []);
-
-  const resumePlayback = useCallback(() => {
-    void videoRef.current?.play().catch(() => undefined);
-  }, []);
 
   useEffect(() => {
     requestPreroll();
   }, [requestPreroll]);
 
   useEffect(() => {
-    if (gateOpen && gateKind === "midroll") pausePlayback();
-  }, [gateOpen, gateKind, pausePlayback]);
-
-  useEffect(() => {
-    if (!started || gateOpen) return;
+    if (!started) return;
+    if (gateOpen && gateKind === "preroll") return;
     if (consumePendingStart()) void videoRef.current?.play().catch(() => undefined);
-    if (consumePendingResume()) resumePlayback();
-  }, [started, gateOpen, consumePendingStart, consumePendingResume, resumePlayback]);
+  }, [started, gateOpen, gateKind, consumePendingStart]);
 
   useEffect(() => {
-    if (!isHls || !videoRef.current || !started || gateOpen) return;
+    if (!isHls || !videoRef.current || !started) return;
     let hls: import("hls.js").default | null = null;
 
     (async () => {
       const Hls = (await import("hls.js")).default;
       if (Hls.isSupported() && videoRef.current) {
-        hls = new Hls();
+        hls = new Hls({ enableWorker: true, lowLatencyMode: true });
         hls.loadSource(streamUrl);
         hls.attachMedia(videoRef.current);
+        hls.on(Hls.Events.ERROR, (_e, data) => {
+          if (data.fatal) hls?.destroy();
+        });
         void videoRef.current.play().catch(() => undefined);
       } else if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
         videoRef.current.src = streamUrl;
@@ -65,7 +55,7 @@ export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
     return () => {
       hls?.destroy();
     };
-  }, [streamUrl, isHls, started, gateOpen]);
+  }, [streamUrl, isHls, started]);
 
   const onVideoTimeUpdate = () => {
     const t = videoRef.current?.currentTime;
@@ -75,37 +65,37 @@ export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
   };
 
   const playerBody = isPageUrl ? (
-    <div className="relative aspect-video w-full">
-      <CastToTvButton titulo={titulo} streamUrl={streamUrl} visible={started && !gateOpen} />
-      {started && !gateOpen ? (
+    <div className="relative h-full min-h-[160px] w-full">
+      <CastToTvButton titulo={titulo} streamUrl={streamUrl} visible={started} />
+      {started ? (
         <iframe
           title={titulo}
           src={streamUrl}
-          className="aspect-video w-full rounded-2xl bg-black"
+          className="h-full min-h-[160px] w-full rounded-none bg-black"
           allowFullScreen
         />
       ) : (
-        <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-black/80">
-          <span className="text-sm text-brand-muted">Programa en vivo</span>
+        <div className="flex h-full min-h-[160px] w-full items-center justify-center bg-black/80">
+          <span className="text-sm text-brand-muted">Cargando en vivo…</span>
         </div>
       )}
     </div>
   ) : (
-    <div className="relative aspect-video w-full">
+    <div className="relative h-full min-h-[160px] w-full">
       <CastToTvButton
         titulo={titulo}
         streamUrl={streamUrl}
         videoRef={videoRef}
-        visible={started && !gateOpen}
+        visible={started}
       />
       <video
         ref={videoRef}
         controls
-        autoPlay={started && !gateOpen}
+        autoPlay={started}
         playsInline
         disableRemotePlayback={false}
         x-webkit-airplay="allow"
-        className="aspect-video w-full rounded-2xl bg-black"
+        className="h-full min-h-[160px] w-full bg-black object-contain"
         src={isHls ? undefined : streamUrl}
         title={titulo}
         onTimeUpdate={onVideoTimeUpdate}

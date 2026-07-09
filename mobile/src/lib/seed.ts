@@ -1,6 +1,6 @@
 /** Canales Nicaragua — respaldo offline (iptv-org) */
 export const canalesNicaragua = [
-  { id: "co-55", nombre: "Canal 55 Telemorisco", red: "Canal 55 · Telemorisco TV", streamUrl: "http://canal.mediaserver.com.co/live/telemorisco.m3u8", pais: "Colombia", categoria: "Entretenimiento" },
+  { id: "co-55", nombre: "Canal 55 Telemorisco", red: "Canal 55 · Telemorisco TV", streamUrl: "https://canal.mediaserver.com.co/live/telemorisco.m3u8", pais: "Colombia", categoria: "Entretenimiento" },
   { id: "ni-chavo", nombre: "El Chavo del 8", red: "El Chavo TV", streamUrl: "https://live20.bozztv.com/giatvplayout7/giatv-211465/playlist.m3u8", pais: "México", categoria: "Clásicos" },
   { id: "ni-comedia", nombre: "Distrito Comedia", red: "Televisa", streamUrl: "http://177.234.249.135:8888/DistritoComedia/index.m3u8", pais: "México", categoria: "Clásicos" },
   { id: "ni-estrellas", nombre: "Las Estrellas", red: "Televisa", streamUrl: "http://177.234.249.135:8888/LasEstrellas/index.m3u8", pais: "México", categoria: "Entretenimiento" },

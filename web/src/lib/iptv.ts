@@ -2,6 +2,8 @@ import {
   CURATED_LIVE_CHANNELS,
   cleanChannelName,
   inferChannelNetwork,
+  normalizeStreamUrl,
+  type CuratedLiveChannel,
 } from "@/lib/live-channels";
 import type { LiveChannel, SportEvent } from "@/types/content";
 
@@ -61,18 +63,21 @@ export async function fetchLiveChannels(): Promise<{
   const seenUrls = new Set<string>();
   let id = 0;
 
-  const addChannel = (partial: Omit<LiveChannel, "id" | "logo"> & { logo?: string }) => {
-    if (!partial.streamUrl.startsWith("http") || seenUrls.has(partial.streamUrl)) {
+  const addChannel = (
+    partial: Omit<LiveChannel, "id" | "logo"> & { logo?: string; id?: string },
+  ) => {
+    const streamUrl = normalizeStreamUrl(partial.streamUrl);
+    if (!streamUrl.startsWith("http") || seenUrls.has(streamUrl)) {
       return;
     }
-    seenUrls.add(partial.streamUrl);
+    seenUrls.add(streamUrl);
     id++;
     const channel: LiveChannel = {
-      id: `live-${id}`,
+      id: partial.id ?? `live-${id}`,
       nombre: partial.nombre,
       red: partial.red ?? inferChannelNetwork(partial.nombre),
       logo: channelLogo(partial.nombre, partial.logo),
-      streamUrl: partial.streamUrl,
+      streamUrl,
       categoria: partial.categoria,
       pais: partial.pais,
     };
@@ -99,7 +104,7 @@ export async function fetchLiveChannels(): Promise<{
   };
 
   for (const curated of CURATED_LIVE_CHANNELS) {
-    addChannel(curated);
+    addChannel(curated as CuratedLiveChannel);
   }
 
   for (const { code, pais } of COUNTRY_PLAYLISTS) {

@@ -1,7 +1,20 @@
 import type { LiveChannel } from "@/types/content";
 
+export type CuratedLiveChannel = Omit<LiveChannel, "id" | "logo"> & {
+  /** ID estable para enlaces (/envivo/co-55) */
+  id?: string;
+};
+
+/** Normaliza URLs HTTP→HTTPS cuando el origen lo soporta (evita mixed content en Vercel). */
+export function normalizeStreamUrl(url: string): string {
+  if (url.startsWith("http://canal.mediaserver.com.co/")) {
+    return url.replace("http://", "https://");
+  }
+  return url;
+}
+
 /** Canales curados: Chespirito, Televisa, clásicos LATAM */
-export const CURATED_LIVE_CHANNELS: Omit<LiveChannel, "id" | "logo">[] = [
+export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
   {
     nombre: "El Chavo del 8",
     red: "El Chavo TV",
@@ -74,9 +87,10 @@ export const CURATED_LIVE_CHANNELS: Omit<LiveChannel, "id" | "logo">[] = [
     pais: "México",
   },
   {
+    id: "co-55",
     nombre: "Canal 55 Telemorisco",
     red: "Canal 55 · Telemorisco TV",
-    streamUrl: "http://canal.mediaserver.com.co/live/telemorisco.m3u8",
+    streamUrl: "https://canal.mediaserver.com.co/live/telemorisco.m3u8",
     categoria: "Entretenimiento",
     pais: "Colombia",
   },
