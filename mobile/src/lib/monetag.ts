@@ -34,9 +34,9 @@ export function getAdGateUrl(): string {
 
 export const MONETAG_ENABLED = Boolean(DIRECT_LINK_URL || MONETAG_ZONE_ID);
 
+/** Desactivado: abría el navegador con popups y impedía ver live/películas. */
 export function openDirectLink(): void {
-  const { Linking } = require("react-native");
-  if (DIRECT_LINK_URL) void Linking.openURL(DIRECT_LINK_URL);
+  /* Anuncios solo en WebView embebido (split screen). */
 }
 
 export { WEB_URL };

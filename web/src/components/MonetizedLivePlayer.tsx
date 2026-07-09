@@ -127,20 +127,14 @@ export function MonetizedLivePlayer({
   const playerBody = isEmbedPage ? (
     <div className="relative aspect-video w-full min-h-[280px]">
       <CastToTvButton titulo={titulo} streamUrl={activeStreamUrl} visible={started} />
-      {started ? (
-        <iframe
-          title={titulo}
-          src={activeStreamUrl}
-          className="absolute inset-0 h-full w-full rounded-none bg-black"
-          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-          referrerPolicy="no-referrer-when-downgrade"
-          allowFullScreen
-        />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-          <span className="text-sm text-brand-muted">Cargando en vivo…</span>
-        </div>
-      )}
+      <iframe
+        title={titulo}
+        src={activeStreamUrl}
+        className="absolute inset-0 h-full w-full rounded-none bg-black"
+        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+        referrerPolicy="no-referrer-when-downgrade"
+        allowFullScreen
+      />
     </div>
   ) : (
     <div className="relative aspect-video w-full min-h-[280px]">

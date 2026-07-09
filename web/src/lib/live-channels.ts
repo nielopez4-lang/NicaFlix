@@ -138,8 +138,8 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "ni-canal4",
     nombre: "Canal 4",
     red: "Nicaragua",
-    streamUrl: normalizeStreamUrl("dm-embed:x7rwv8c"),
-    streamFallbacks: [normalizeStreamUrl("dailymotion:x7rwv8c")],
+    streamUrl:
+      "https://www.dailymotion.com/embed/video/x7rwv8c?autoplay=1&ui-start-screen-info=0&queue-enable=0",
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },
@@ -147,8 +147,8 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "ni-canal6",
     nombre: "Canal 6 Nicaragüense",
     red: "Nicaragua",
-    streamUrl: normalizeStreamUrl("dm-embed:xaka1oy"),
-    streamFallbacks: [normalizeStreamUrl("dailymotion:xaka1oy")],
+    streamUrl:
+      "https://www.dailymotion.com/embed/video/xaka1oy?autoplay=1&ui-start-screen-info=0&queue-enable=0",
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },
@@ -167,8 +167,8 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "ni-canal15",
     nombre: "Canal 15",
     red: "Nicaragua",
-    streamUrl: normalizeStreamUrl("dm-embed:xaka1oy"),
-    streamFallbacks: [normalizeStreamUrl("dailymotion:xaka1oy")],
+    streamUrl:
+      "https://www.dailymotion.com/embed/video/xaka1oy?autoplay=1&ui-start-screen-info=0&queue-enable=0",
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },

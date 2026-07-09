@@ -96,9 +96,9 @@ export function getInvokeScriptUrl(zone: string): string {
   return `https://www.highperformanceformat.com/${zone}/invoke.js`;
 }
 
+/** Desactivado: Direct Link abría popups invasivos (juegos) y bloqueaba móvil. */
 export function openDirectLink(): void {
-  if (typeof window === "undefined" || !DIRECT_LINK_URL) return;
-  window.open(DIRECT_LINK_URL, "_blank", "noopener,noreferrer");
+  /* Sin pop-under / pestañas externas — anuncios solo en slots controlados. */
 }
 
 export function buildBannerAdHtml(
@@ -109,15 +109,12 @@ export function buildBannerAdHtml(
   return buildNativeAdSlotHtml(zone, minHeight, invokeUrl);
 }
 
-/** HTML aislado por iframe: MultiTag + invoke.js → banner nativo Monetag. */
+/** HTML aislado por iframe: invoke.js → banner nativo Monetag (sin MultiTag global). */
 export function buildNativeAdSlotHtml(
   zone: string,
   minHeight = 250,
   invokeUrl?: string,
 ): string {
-  const multitag =
-    getPublicEnv("NEXT_PUBLIC_MONETAG_SCRIPT_SRC") ||
-    MONETAG_DEFAULTS.multitagScript;
   const invoke =
     invokeUrl || getInvokeScriptUrl(zone);
 
@@ -126,9 +123,7 @@ export function buildNativeAdSlotHtml(
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<link rel="preconnect" href="https://quge5.com"/>
 <link rel="preconnect" href="https://www.highperformanceformat.com"/>
-<script src="${multitag}" data-zone="${zone}" data-cfasync="false" async><\/script>
 <script async data-cfasync="false" src="${invoke}"><\/script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
