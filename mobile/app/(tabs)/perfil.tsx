@@ -1,4 +1,12 @@
-import { MONETAG_ENABLED, WEB_URL, getAdGateUrl } from "@/lib/monetag";
+import { WEB_URL } from "@/lib/monetag";
+import {
+  Image,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function PerfilScreen() {
   return (
@@ -9,8 +17,7 @@ export default function PerfilScreen() {
 
       <View style={styles.card}>
         <Text style={styles.cardText}>
-          FilmRise Movies, TV en vivo, deportes y anime. Anuncios Monetag antes
-          de reproducir contenido.
+          FilmRise Movies, TV en vivo, deportes y anime. 100% gratis.
         </Text>
       </View>
 
@@ -24,12 +31,6 @@ export default function PerfilScreen() {
       >
         <Text style={styles.btnSecondaryText}>Compartir app</Text>
       </Pressable>
-
-      <Text style={styles.hint}>
-        {MONETAG_ENABLED
-          ? "Monetag configurado ✓"
-          : `Anuncios vía web: ${getAdGateUrl()}`}
-      </Text>
     </View>
   );
 }
@@ -45,5 +46,4 @@ const styles = StyleSheet.create({
   btnText: { color: "#fff", textAlign: "center", fontWeight: "700" },
   btnSecondary: { borderWidth: 1, borderColor: "#444", padding: 16, borderRadius: 12, marginTop: 12, width: "100%" },
   btnSecondaryText: { color: "#fff", textAlign: "center" },
-  hint: { color: "#666", fontSize: 11, marginTop: 16, textAlign: "center" },
 });

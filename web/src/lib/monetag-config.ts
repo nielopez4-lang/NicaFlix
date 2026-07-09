@@ -162,7 +162,8 @@ ${invokeTag}
 export const SITE_URL =
   getPublicEnv("NEXT_PUBLIC_SITE_URL") || MONETAG_DEFAULTS.siteUrl;
 
-export const ANDROID_APK_URL = getPublicEnv("NEXT_PUBLIC_ANDROID_APK_URL");
+export const ANDROID_APK_URL =
+  getPublicEnv("NEXT_PUBLIC_ANDROID_APK_URL") || MONETAG_DEFAULTS.androidApkUrl;
 export const IOS_APP_URL = getPublicEnv("NEXT_PUBLIC_IOS_APP_URL");
 
 /** true cuando hay zone + direct link configurados (env o defaults) */
