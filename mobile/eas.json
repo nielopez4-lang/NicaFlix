@@ -12,6 +12,12 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://web-five-plum-og6kinpc9v.vercel.app",
+        "EXPO_PUBLIC_WEB_URL": "https://web-five-plum-og6kinpc9v.vercel.app",
+        "EXPO_PUBLIC_MONETAG_ZONE_ID": "11257226",
+        "EXPO_PUBLIC_MONETAG_DIRECT_LINK": "https://omg10.com/4/11257226"
       }
     },
     "production": {

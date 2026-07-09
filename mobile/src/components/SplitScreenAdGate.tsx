@@ -1,4 +1,5 @@
-import { openDirectLink, VIDEO_AD, WEB_URL } from "@/lib/monetag";
+import { getAdEmbedUrl, openDirectLink, VIDEO_AD } from "@/lib/monetag";
+import { MONETAG_ZONES } from "@/lib/monetag-zones";
 import { useEffect, useRef, useState } from "react";
 import {
   Pressable,
@@ -52,7 +53,7 @@ export function SplitScreenAdGate({
   }
 
   const ready = seconds <= 0;
-  const embedUrl = `${WEB_URL}/api/ad-embed?zone=11257226&h=180`;
+  const embedUrl = getAdEmbedUrl(MONETAG_ZONES.PREROLL, 180);
 
   return (
     <View style={[styles.split, style]}>

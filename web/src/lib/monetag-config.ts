@@ -1,28 +1,36 @@
 /**
  * Configuración centralizada Monetag — NicaFlix
- * Variables: NEXT_PUBLIC_* (estándar Next.js / Vercel)
+ * Variables: NEXT_PUBLIC_* (Vercel) con fallback a MONETAG_DEFAULTS
  */
 import { getPublicEnv, getPublicEnvFirst } from "@/lib/env";
+import { MONETAG_DEFAULTS } from "@/lib/monetag-defaults";
+
+export function primaryZoneId(): string {
+  return getPublicEnv("NEXT_PUBLIC_MONETAG_ZONE_ID") || MONETAG_DEFAULTS.zoneId;
+}
 
 function fallbackZone(...keys: string[]): string {
   for (const key of keys) {
     const value = getPublicEnv(key);
     if (value) return value;
   }
-  return getPublicEnvFirst(
-    "NEXT_PUBLIC_MONETAG_ZONE_BANNER",
-    "NEXT_PUBLIC_MONETAG_ZONE_ID",
+  return (
+    getPublicEnvFirst(
+      "NEXT_PUBLIC_MONETAG_ZONE_BANNER",
+      "NEXT_PUBLIC_MONETAG_ZONE_ID",
+    ) || MONETAG_DEFAULTS.zoneId
   );
 }
 
 /** Zone ID Direct Link para triggers de video (pre-roll / mid-roll) */
 export const DIRECT_LINK_ZONE_ID =
-  getPublicEnv("NEXT_PUBLIC_MONETAG_DIRECT_LINK_ZONE") || "11257226";
+  getPublicEnv("NEXT_PUBLIC_MONETAG_DIRECT_LINK_ZONE") ||
+  MONETAG_DEFAULTS.directLinkZone;
 
 /** URL Direct Link Monetag */
 export const DIRECT_LINK_URL =
   getPublicEnv("NEXT_PUBLIC_MONETAG_DIRECT_LINK") ||
-  `https://omg10.com/4/${DIRECT_LINK_ZONE_ID}`;
+  MONETAG_DEFAULTS.directLink;
 
 /** Triggers automáticos en reproductor */
 export const VIDEO_AD = {
@@ -32,19 +40,19 @@ export const VIDEO_AD = {
   midrollCheckMs: 20_000,
 } as const;
 
+const zoneId = primaryZoneId();
+
 /** MultiTag global (head) — carga async, no bloquea */
 export const MONETAG_GLOBAL = {
-  zoneId: getPublicEnv("NEXT_PUBLIC_MONETAG_ZONE_ID"),
+  zoneId,
   scriptSrc:
     getPublicEnv("NEXT_PUBLIC_MONETAG_SCRIPT_SRC") ||
-    (getPublicEnv("NEXT_PUBLIC_MONETAG_ZONE_ID")
-      ? `https://s.monetag.com/tag/${getPublicEnv("NEXT_PUBLIC_MONETAG_ZONE_ID")}.js`
-      : ""),
+    MONETAG_DEFAULTS.multitagScript,
   scriptIpp: getPublicEnv("NEXT_PUBLIC_MONETAG_SCRIPT_IPP"),
-  verify: "6c34729c43bee7297fd3f09cf22ea9ab",
+  verify: MONETAG_DEFAULTS.verify,
 } as const;
 
-/** 12 Banner Containers — un zoneId por slot */
+/** 12 Banner Containers — un zoneId por slot (mismo ID si no hay zonas extra) */
 export const MONETAG_ZONES = {
   HOME_TOP: fallbackZone("NEXT_PUBLIC_MONETAG_ZONE_HOME_TOP"),
   HOME_MID: fallbackZone("NEXT_PUBLIC_MONETAG_ZONE_HOME_MID"),
@@ -70,20 +78,20 @@ export const MONETAG_ZONES = {
 export type MonetagZoneKey = keyof typeof MONETAG_ZONES;
 
 export function resolveZoneId(
-  zoneId?: string | null,
+  zoneIdParam?: string | null,
   fallbackKey?: MonetagZoneKey,
 ): string {
-  if (zoneId) return zoneId;
+  if (zoneIdParam) return zoneIdParam;
   if (fallbackKey && MONETAG_ZONES[fallbackKey]) {
     return MONETAG_ZONES[fallbackKey];
   }
   return fallbackZone();
 }
 
-export function getInvokeScriptUrl(zoneId: string): string {
+export function getInvokeScriptUrl(zone: string): string {
   const custom = getPublicEnv("NEXT_PUBLIC_MONETAG_INVOKE_SCRIPT");
   if (custom) return custom;
-  return `https://www.highperformanceformat.com/${zoneId}/invoke.js`;
+  return `https://www.highperformanceformat.com/${zone}/invoke.js`;
 }
 
 export function openDirectLink(): void {
@@ -118,7 +126,11 @@ export function buildBannerAdHtml(
 </html>`;
 }
 
-export const SITE_URL = getPublicEnv("NEXT_PUBLIC_SITE_URL");
+export const SITE_URL =
+  getPublicEnv("NEXT_PUBLIC_SITE_URL") || MONETAG_DEFAULTS.siteUrl;
 
 export const ANDROID_APK_URL = getPublicEnv("NEXT_PUBLIC_ANDROID_APK_URL");
 export const IOS_APP_URL = getPublicEnv("NEXT_PUBLIC_IOS_APP_URL");
+
+/** true cuando hay zone + direct link configurados (env o defaults) */
+export const MONETAG_READY = Boolean(zoneId && DIRECT_LINK_URL);
