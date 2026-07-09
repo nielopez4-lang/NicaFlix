@@ -23,12 +23,25 @@ function upgradeToHttps(url: string): string {
   return url;
 }
 
+const DAILYMOTION_PREFIX = "dailymotion:";
+
 function isStreamResource(url: string): boolean {
-  return /\.(m3u8|ts|m4s|mp4)(\?|$)/i.test(url) || url.includes(".m3u8");
+  return (
+    /\.(m3u8|ts|m4s|mp4)(\?|$)/i.test(url) ||
+    url.includes(".m3u8") ||
+    url.includes("/api/dailymotion") ||
+    url.includes("/api/hls")
+  );
 }
 
-/** Misma lógica que web: HTTP → proxy /api/hls en el servidor NicaFlix. */
+/** Misma lógica que web: HTTP / DailyMotion → APIs en el servidor NicaFlix. */
 export function normalizeStreamUrl(streamUrl: string): string {
+  if (streamUrl.startsWith(DAILYMOTION_PREFIX)) {
+    const id = streamUrl.slice(DAILYMOTION_PREFIX.length).trim();
+    const base = WEB_URL.replace(/\/$/, "");
+    return `${base}/api/dailymotion?video=${encodeURIComponent(id)}`;
+  }
+
   if (!streamUrl.startsWith("http")) return streamUrl;
 
   const upgraded = upgradeToHttps(streamUrl);

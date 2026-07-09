@@ -3,15 +3,40 @@
 import { CastToTvButton } from "@/components/CastToTvButton";
 import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
 import { useLiveAdTriggers } from "@/hooks/useLiveAdTriggers";
-import { useEffect, useRef } from "react";
+import { isDailyMotionStreamUrl } from "@/lib/stream-playback";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type Props = { streamUrl: string; titulo: string };
+type Props = {
+  streamUrl: string;
+  titulo: string;
+  streamFallbacks?: string[];
+};
 
-export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
+function isHlsPlaybackUrl(url: string): boolean {
+  return (
+    url.includes(".m3u8") ||
+    url.includes("/api/hls") ||
+    isDailyMotionStreamUrl(url)
+  );
+}
+
+export function MonetizedLivePlayer({
+  streamUrl,
+  titulo,
+  streamFallbacks = [],
+}: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isHls =
-    streamUrl.includes(".m3u8") || streamUrl.includes("/api/hls");
-  const isPageUrl = !isHls && !streamUrl.match(/\.mp4|\.mpd/i);
+  const hlsRef = useRef<import("hls.js").default | null>(null);
+  const sourceIndexRef = useRef(0);
+  const [activeStreamUrl, setActiveStreamUrl] = useState(streamUrl);
+
+  const sources = useMemo(
+    () => [streamUrl, ...streamFallbacks],
+    [streamUrl, streamFallbacks],
+  );
+
+  const isHls = isHlsPlaybackUrl(activeStreamUrl);
+  const isPageUrl = !isHls && !activeStreamUrl.match(/\.mp4|\.mpd/i);
 
   const {
     watchPositionRef,
@@ -22,6 +47,19 @@ export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
     completeGate,
     consumePendingStart,
   } = useLiveAdTriggers();
+
+  useEffect(() => {
+    sourceIndexRef.current = 0;
+    setActiveStreamUrl(streamUrl);
+  }, [streamUrl]);
+
+  const tryNextSource = useCallback(() => {
+    const nextIndex = sourceIndexRef.current + 1;
+    if (nextIndex >= sources.length) return false;
+    sourceIndexRef.current = nextIndex;
+    setActiveStreamUrl(sources[nextIndex]!);
+    return true;
+  }, [sources]);
 
   useEffect(() => {
     requestPreroll();
@@ -35,28 +73,42 @@ export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
 
   useEffect(() => {
     if (!isHls || !videoRef.current || !started) return;
-    let hls: import("hls.js").default | null = null;
+    let cancelled = false;
 
     (async () => {
       const Hls = (await import("hls.js")).default;
-      if (Hls.isSupported() && videoRef.current) {
-        hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-        hls.loadSource(streamUrl);
-        hls.attachMedia(videoRef.current);
-        hls.on(Hls.Events.ERROR, (_e, data) => {
-          if (data.fatal) hls?.destroy();
-        });
-        void videoRef.current.play().catch(() => undefined);
-      } else if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
-        videoRef.current.src = streamUrl;
-        void videoRef.current.play().catch(() => undefined);
+      if (!Hls.isSupported() || !videoRef.current || cancelled) {
+        if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
+          videoRef.current.src = activeStreamUrl;
+          void videoRef.current.play().catch(() => undefined);
+        }
+        return;
       }
+
+      hlsRef.current?.destroy();
+      const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      hlsRef.current = hls;
+      hls.loadSource(activeStreamUrl);
+      hls.attachMedia(videoRef.current);
+
+      hls.on(Hls.Events.ERROR, (_e, data) => {
+        if (!data.fatal) return;
+        hls.destroy();
+        hlsRef.current = null;
+        if (!tryNextSource()) {
+          void videoRef.current?.play().catch(() => undefined);
+        }
+      });
+
+      void videoRef.current.play().catch(() => undefined);
     })();
 
     return () => {
-      hls?.destroy();
+      cancelled = true;
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
     };
-  }, [streamUrl, isHls, started]);
+  }, [activeStreamUrl, isHls, started, tryNextSource]);
 
   const onVideoTimeUpdate = () => {
     const t = videoRef.current?.currentTime;
@@ -67,12 +119,13 @@ export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
 
   const playerBody = isPageUrl ? (
     <div className="relative h-full min-h-[160px] w-full">
-      <CastToTvButton titulo={titulo} streamUrl={streamUrl} visible={started} />
+      <CastToTvButton titulo={titulo} streamUrl={activeStreamUrl} visible={started} />
       {started ? (
         <iframe
           title={titulo}
-          src={streamUrl}
+          src={activeStreamUrl}
           className="h-full min-h-[160px] w-full rounded-none bg-black"
+          allow="autoplay; fullscreen; encrypted-media"
           allowFullScreen
         />
       ) : (
@@ -85,7 +138,7 @@ export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
     <div className="relative h-full min-h-[160px] w-full">
       <CastToTvButton
         titulo={titulo}
-        streamUrl={streamUrl}
+        streamUrl={activeStreamUrl}
         videoRef={videoRef}
         visible={started}
       />
@@ -97,7 +150,7 @@ export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
         disableRemotePlayback={false}
         x-webkit-airplay="allow"
         className="h-full min-h-[160px] w-full bg-black object-contain"
-        src={isHls ? undefined : streamUrl}
+        src={isHls ? undefined : activeStreamUrl}
         title={titulo}
         onTimeUpdate={onVideoTimeUpdate}
       />

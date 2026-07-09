@@ -65,7 +65,11 @@ export async function fetchLiveChannels(): Promise<{
   let id = 0;
 
   const addChannel = (
-    partial: Omit<LiveChannel, "id" | "logo"> & { logo?: string; id?: string },
+    partial: Omit<LiveChannel, "id" | "logo"> & {
+      logo?: string;
+      id?: string;
+      streamFallbacks?: string[];
+    },
   ) => {
     const streamUrl = normalizeStreamUrl(partial.streamUrl);
     if (!streamUrl.startsWith("http") || seenUrls.has(streamUrl)) {
@@ -79,6 +83,7 @@ export async function fetchLiveChannels(): Promise<{
       red: partial.red ?? inferChannelNetwork(partial.nombre),
       logo: channelLogo(partial.nombre, partial.logo),
       streamUrl,
+      streamFallbacks: partial.streamFallbacks?.map(normalizeStreamUrl),
       categoria: partial.categoria,
       pais: partial.pais,
     };

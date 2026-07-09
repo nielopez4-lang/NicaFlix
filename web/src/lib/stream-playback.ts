@@ -1,4 +1,11 @@
+import {
+  DAILYMOTION_PREFIX,
+  isDailyMotionStreamUrl,
+  toDailyMotionPlaybackUrl,
+} from "@/lib/dailymotion-live";
 import { SITE_URL } from "@/lib/monetag-config";
+
+export { DAILYMOTION_PREFIX, isDailyMotionStreamUrl };
 
 /** Dominios donde HTTP→HTTPS directo funciona (sin proxy). */
 const HTTPS_UPGRADE_HOSTS = ["canal.mediaserver.com.co"];
@@ -20,7 +27,12 @@ function upgradeToHttps(url: string): string {
 }
 
 function isStreamResource(url: string): boolean {
-  return /\.(m3u8|ts|m4s|mp4)(\?|$)/i.test(url) || url.includes(".m3u8");
+  return (
+    /\.(m3u8|ts|m4s|mp4)(\?|$)/i.test(url) ||
+    url.includes(".m3u8") ||
+    url.includes("/api/dailymotion") ||
+    url.includes("/api/hls")
+  );
 }
 
 /** URL reproducible en HTTPS (web + app). HTTP → proxy /api/hls. */
@@ -28,6 +40,13 @@ export function toPlaybackStreamUrl(
   streamUrl: string,
   origin: string = SITE_URL,
 ): string {
+  if (streamUrl.startsWith(DAILYMOTION_PREFIX)) {
+    return toDailyMotionPlaybackUrl(
+      streamUrl.slice(DAILYMOTION_PREFIX.length).trim(),
+      origin,
+    );
+  }
+
   if (!streamUrl.startsWith("http")) return streamUrl;
 
   const upgraded = upgradeToHttps(streamUrl);

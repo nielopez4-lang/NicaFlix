@@ -28,6 +28,8 @@ export type LiveChannel = {
   red?: string;
   logo: string;
   streamUrl: string;
+  /** URLs alternativas si la principal falla (m3u8, DailyMotion, embed). */
+  streamFallbacks?: string[];
   categoria: string;
   pais: string;
 };
