@@ -35,6 +35,8 @@ export const DIRECT_LINK_URL =
 /** Triggers automáticos en reproductor */
 export const VIDEO_AD = {
   prerollSeconds: 10,
+  /** Segundos que permanece visible el panel de anuncio en mid-roll (video sigue) */
+  midrollDisplaySec: 15,
   midrollIntervalMs: 15 * 60 * 1000,
   midrollIntervalSec: 15 * 60,
   midrollCheckMs: 20_000,
@@ -104,25 +106,56 @@ export function buildBannerAdHtml(
   invokeUrl: string,
   minHeight = 250,
 ): string {
+  return buildSlotAdHtml(zone, invokeUrl, DIRECT_LINK_URL, minHeight);
+}
+
+/** HTML para cuadros de anuncio: banner nativo + Direct Link siempre visible. */
+export function buildSlotAdHtml(
+  zone: string,
+  invokeUrl: string,
+  directLinkUrl: string,
+  minHeight = 250,
+): string {
+  const bannerHeight = Math.min(120, Math.floor(minHeight * 0.35));
+  const frameHeight = Math.max(120, minHeight - bannerHeight);
+  const invokeTag = invokeUrl
+    ? `<script async="async" data-cfasync="false" src="${invokeUrl}"><\/script>`
+    : "";
+
+  const directFrame = directLinkUrl
+    ? `<iframe class="ad-frame" src="${directLinkUrl}" title="Publicidad" referrerpolicy="no-referrer-when-downgrade"></iframe>`
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<script async="async" data-cfasync="false" src="${invokeUrl}"><\/script>
+${invokeTag}
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{min-height:100%;background:#0f0f14}
   #container-${zone}{
-    min-height:${minHeight}px;
+    min-height:${bannerHeight}px;
     width:100%;
     display:flex;
     align-items:center;
     justify-content:center;
   }
+  .ad-frame{
+    width:100%;
+    border:0;
+    display:block;
+    min-height:${frameHeight}px;
+    height:${frameHeight}px;
+    background:#0f0f14;
+  }
 </style>
 </head>
-<body><div id="container-${zone}"></div></body>
+<body>
+  <div id="container-${zone}"></div>
+  ${directFrame}
+</body>
 </html>`;
 }
 

@@ -2,7 +2,7 @@
 
 import {
   MONETAG_DIRECT_LINK,
-  buildBannerAdHtml,
+  buildSlotAdHtml,
   getBannerInvokeUrl,
   getBannerZoneId,
 } from "@/lib/monetag";
@@ -33,7 +33,12 @@ export function MonetagNativeSlot({
   const height = primary ? minHeight : Math.min(minHeight, 120);
 
   if (zone && invokeUrl) {
-    const srcDoc = buildBannerAdHtml(zone, invokeUrl);
+    const srcDoc = buildSlotAdHtml(
+      zone,
+      invokeUrl,
+      MONETAG_DIRECT_LINK,
+      height,
+    );
     return (
       <iframe
         key={slotId}

@@ -13,6 +13,7 @@ export function AdSlot({ slot, className = "", minHeight = 250 }: Props) {
   return (
     <AdContainer
       zoneId={MONETAG_ZONES[slot]}
+      slotKey={slot}
       className={className}
       minHeight={minHeight}
     />
