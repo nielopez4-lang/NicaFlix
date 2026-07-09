@@ -73,6 +73,13 @@ export const CURATED_LIVE_CHANNELS: Omit<LiveChannel, "id" | "logo">[] = [
     categoria: "Noticias",
     pais: "México",
   },
+  {
+    nombre: "Canal 55 Telemorisco",
+    red: "Canal 55 · Telemorisco TV",
+    streamUrl: "http://canal.mediaserver.com.co/live/telemorisco.m3u8",
+    categoria: "Entretenimiento",
+    pais: "Colombia",
+  },
 ];
 
 export function inferChannelNetwork(nombre: string): string | undefined {
@@ -91,7 +98,8 @@ export function inferChannelNetwork(nombre: string): string | undefined {
   if (/univision|telemundo|galavisi/.test(n)) return "Univision";
   if (/tn8|canal 4|canal 6|canal 13|canal 15|viva nicaragua/.test(n))
     return "Nicaragua";
-  if (/espn|fox deport|tudn|bein|mlb|strike/.test(n)) return "Deportes";
+  if (/canal 55|telemorisco/.test(n)) return "Canal 55 · Telemorisco TV";
+  if (/rcn|caracol|city tv|canal 1|win sports/.test(n)) return "Colombia";
   return undefined;
 }
 
