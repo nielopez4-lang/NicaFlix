@@ -1,10 +1,28 @@
 export const DAILYMOTION_PREFIX = "dailymotion:";
+export const DAILYMOTION_EMBED_PREFIX = "dm-embed:";
 
 export function isDailyMotionStreamUrl(streamUrl: string): boolean {
   return (
     streamUrl.startsWith(DAILYMOTION_PREFIX) ||
     streamUrl.includes("/api/dailymotion")
   );
+}
+
+export function isDailyMotionEmbedUrl(streamUrl: string): boolean {
+  return (
+    streamUrl.startsWith(DAILYMOTION_EMBED_PREFIX) ||
+    streamUrl.includes("dailymotion.com/embed/video/")
+  );
+}
+
+export function toDailyMotionEmbedUrl(videoId: string): string {
+  const params = new URLSearchParams({
+    autoplay: "1",
+    "ui-start-screen-info": "0",
+    "queue-enable": "0",
+    mute: "0",
+  });
+  return `https://www.dailymotion.com/embed/video/${encodeURIComponent(videoId)}?${params}`;
 }
 
 export function toDailyMotionPlaybackUrl(

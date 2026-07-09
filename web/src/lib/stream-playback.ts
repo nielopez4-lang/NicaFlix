@@ -1,11 +1,19 @@
 import {
+  DAILYMOTION_EMBED_PREFIX,
   DAILYMOTION_PREFIX,
+  isDailyMotionEmbedUrl,
   isDailyMotionStreamUrl,
+  toDailyMotionEmbedUrl,
   toDailyMotionPlaybackUrl,
 } from "@/lib/dailymotion-live";
 import { SITE_URL } from "@/lib/monetag-config";
 
-export { DAILYMOTION_PREFIX, isDailyMotionStreamUrl };
+export {
+  DAILYMOTION_EMBED_PREFIX,
+  DAILYMOTION_PREFIX,
+  isDailyMotionEmbedUrl,
+  isDailyMotionStreamUrl,
+};
 
 /** Dominios donde HTTP→HTTPS directo funciona (sin proxy). */
 const HTTPS_UPGRADE_HOSTS = ["canal.mediaserver.com.co"];
@@ -40,6 +48,12 @@ export function toPlaybackStreamUrl(
   streamUrl: string,
   origin: string = SITE_URL,
 ): string {
+  if (streamUrl.startsWith(DAILYMOTION_EMBED_PREFIX)) {
+    return toDailyMotionEmbedUrl(
+      streamUrl.slice(DAILYMOTION_EMBED_PREFIX.length).trim(),
+    );
+  }
+
   if (streamUrl.startsWith(DAILYMOTION_PREFIX)) {
     return toDailyMotionPlaybackUrl(
       streamUrl.slice(DAILYMOTION_PREFIX.length).trim(),

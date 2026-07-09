@@ -24,6 +24,11 @@ function upgradeToHttps(url: string): string {
 }
 
 const DAILYMOTION_PREFIX = "dailymotion:";
+const DAILYMOTION_EMBED_PREFIX = "dm-embed:";
+
+function toDailyMotionEmbedUrl(videoId: string): string {
+  return `https://www.dailymotion.com/embed/video/${encodeURIComponent(videoId)}?autoplay=1&ui-start-screen-info=0&queue-enable=0`;
+}
 
 function isStreamResource(url: string): boolean {
   return (
@@ -36,6 +41,12 @@ function isStreamResource(url: string): boolean {
 
 /** Misma lógica que web: HTTP / DailyMotion → APIs en el servidor NicaFlix. */
 export function normalizeStreamUrl(streamUrl: string): string {
+  if (streamUrl.startsWith(DAILYMOTION_EMBED_PREFIX)) {
+    return toDailyMotionEmbedUrl(
+      streamUrl.slice(DAILYMOTION_EMBED_PREFIX.length).trim(),
+    );
+  }
+
   if (streamUrl.startsWith(DAILYMOTION_PREFIX)) {
     const id = streamUrl.slice(DAILYMOTION_PREFIX.length).trim();
     const base = WEB_URL.replace(/\/$/, "");

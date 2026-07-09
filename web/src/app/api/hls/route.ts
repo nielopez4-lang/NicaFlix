@@ -22,7 +22,9 @@ export async function GET(request: Request) {
       headers: {
         "User-Agent": UA,
         Accept: "*/*",
-        Referer: `${target.origin}/`,
+        Referer: target.hostname.includes("cloudfront.net")
+          ? "https://www.canal10.com.ni/"
+          : `${target.origin}/`,
       },
       cache: "no-store",
     });

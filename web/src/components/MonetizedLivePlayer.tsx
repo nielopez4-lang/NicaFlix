@@ -3,7 +3,10 @@
 import { CastToTvButton } from "@/components/CastToTvButton";
 import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
 import { useLiveAdTriggers } from "@/hooks/useLiveAdTriggers";
-import { isDailyMotionStreamUrl } from "@/lib/stream-playback";
+import {
+  isDailyMotionEmbedUrl,
+  isDailyMotionStreamUrl,
+} from "@/lib/stream-playback";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
@@ -36,7 +39,11 @@ export function MonetizedLivePlayer({
   );
 
   const isHls = isHlsPlaybackUrl(activeStreamUrl);
-  const isPageUrl = !isHls && !activeStreamUrl.match(/\.mp4|\.mpd/i);
+  const isEmbedPage =
+    isDailyMotionEmbedUrl(activeStreamUrl) ||
+    (!isHls &&
+      !activeStreamUrl.match(/\.mp4|\.mpd/i) &&
+      !isDailyMotionStreamUrl(activeStreamUrl));
 
   const {
     watchPositionRef,
@@ -117,25 +124,26 @@ export function MonetizedLivePlayer({
     }
   };
 
-  const playerBody = isPageUrl ? (
-    <div className="relative h-full min-h-[160px] w-full">
+  const playerBody = isEmbedPage ? (
+    <div className="relative aspect-video w-full min-h-[280px]">
       <CastToTvButton titulo={titulo} streamUrl={activeStreamUrl} visible={started} />
       {started ? (
         <iframe
           title={titulo}
           src={activeStreamUrl}
-          className="h-full min-h-[160px] w-full rounded-none bg-black"
-          allow="autoplay; fullscreen; encrypted-media"
+          className="absolute inset-0 h-full w-full rounded-none bg-black"
+          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+          referrerPolicy="no-referrer-when-downgrade"
           allowFullScreen
         />
       ) : (
-        <div className="flex h-full min-h-[160px] w-full items-center justify-center bg-black/80">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80">
           <span className="text-sm text-brand-muted">Cargando en vivo…</span>
         </div>
       )}
     </div>
   ) : (
-    <div className="relative h-full min-h-[160px] w-full">
+    <div className="relative aspect-video w-full min-h-[280px]">
       <CastToTvButton
         titulo={titulo}
         streamUrl={activeStreamUrl}
@@ -149,7 +157,7 @@ export function MonetizedLivePlayer({
         playsInline
         disableRemotePlayback={false}
         x-webkit-airplay="allow"
-        className="h-full min-h-[160px] w-full bg-black object-contain"
+        className="absolute inset-0 h-full w-full bg-black object-contain"
         src={isHls ? undefined : activeStreamUrl}
         title={titulo}
         onTimeUpdate={onVideoTimeUpdate}

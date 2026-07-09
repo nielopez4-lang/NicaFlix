@@ -18,12 +18,19 @@ function isHlsPlayback(url: string): boolean {
   );
 }
 
+function isEmbedPage(url: string): boolean {
+  return (
+    url.includes("dailymotion.com/embed/video/") ||
+    (!isDirectMedia(url) && !isHlsPlayback(url))
+  );
+}
+
 /**
  * Reproductor para streams con URL y licencia válida (HLS/DASH/embed).
  * Usa URLs que tengas derecho a distribuir — no reempaqueta fuentes sin permiso.
  */
 export function LicensedStreamPlayer({ streamUrl, titulo }: Props) {
-  if (!isDirectMedia(streamUrl) && !isHlsPlayback(streamUrl)) {
+  if (isEmbedPage(streamUrl)) {
     return (
       <View style={styles.container} accessibilityLabel={titulo}>
         <WebView
