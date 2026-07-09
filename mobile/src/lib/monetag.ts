@@ -1,7 +1,7 @@
 import { getExpoEnv } from "@/lib/env";
 
-const DEFAULT_ZONE_ID = "11257226";
-const DEFAULT_DIRECT_LINK = "https://omg10.com/4/11257226";
+const DEFAULT_ZONE_ID = "258015";
+const DEFAULT_DIRECT_LINK = "https://quge5.com/4/258015";
 
 const WEB_URL =
   getExpoEnv("EXPO_PUBLIC_WEB_URL") ||
@@ -16,6 +16,7 @@ export const DIRECT_LINK_URL =
 
 export const VIDEO_AD = {
   prerollSeconds: 10,
+  midrollDisplaySec: 15,
   midrollIntervalMs: 15 * 60 * 1000,
 } as const;
 

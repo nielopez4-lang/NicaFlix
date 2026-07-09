@@ -12,7 +12,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 
 import { MonetagInit } from "@/components/MonetagInit";
 
-import { MONETAG_SCRIPT_SRC, MONETAG_SCRIPT_IPP, MONETAG_VERIFY } from "@/lib/monetag";
+import { MONETAG_SCRIPT_SRC, MONETAG_SCRIPT_IPP, MONETAG_VERIFY, MONETAG_ZONE_ID } from "@/lib/monetag";
 
 
 
@@ -97,19 +97,14 @@ export default function RootLayout({
         <meta name="monetag" content={MONETAG_VERIFY} />
 
         {MONETAG_SCRIPT_SRC ? (
-
           <Script
-
             id="monetag-multitag"
-
             src={MONETAG_SCRIPT_SRC}
-
             strategy="beforeInteractive"
-
             data-cfasync="false"
-
+            data-zone={MONETAG_ZONE_ID}
+            async
           />
-
         ) : null}
 
         {MONETAG_SCRIPT_IPP ? (

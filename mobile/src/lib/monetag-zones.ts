@@ -1,6 +1,6 @@
 import { getExpoEnv, getExpoEnvFirst } from "@/lib/env";
 
-const DEFAULT_ZONE_ID = "11257226";
+const DEFAULT_ZONE_ID = "258015";
 
 /** Zone IDs para banners móviles */
 function zone(...keys: string[]): string {
