@@ -1,5 +1,6 @@
 import {
   CURATED_LIVE_CHANNELS,
+  CURATED_SPORTS_CHANNELS,
   cleanChannelName,
   inferChannelNetwork,
   normalizeStreamUrl,
@@ -90,7 +91,7 @@ export async function fetchLiveChannels(): Promise<{
       deportesCanales.push(channel);
       if (/mlb|baseball|strike|beisbol/i.test(partial.nombre)) {
         eventosDeportes.push({
-          id: `evt-${id}`,
+          id: `evt-${channel.id}`,
           titulo: channel.nombre,
           hora: "Programación MLB / deportes",
           enVivo: true,
@@ -107,6 +108,10 @@ export async function fetchLiveChannels(): Promise<{
     addChannel(curated as CuratedLiveChannel);
   }
 
+  for (const curated of CURATED_SPORTS_CHANNELS) {
+    addChannel(curated as CuratedLiveChannel);
+  }
+
   for (const { code, pais } of COUNTRY_PLAYLISTS) {
     try {
       const res = await fetch(
@@ -118,7 +123,7 @@ export async function fetchLiveChannels(): Promise<{
       for (const ch of channels) {
         addChannel({
           nombre: ch.nombre,
-          streamUrl: ch.streamUrl,
+          streamUrl: normalizeStreamUrl(ch.streamUrl),
           logo: ch.logo,
           categoria: pais,
           pais,

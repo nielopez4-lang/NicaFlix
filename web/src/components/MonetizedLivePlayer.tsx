@@ -9,7 +9,8 @@ type Props = { streamUrl: string; titulo: string };
 
 export function MonetizedLivePlayer({ streamUrl, titulo }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isHls = streamUrl.includes(".m3u8");
+  const isHls =
+    streamUrl.includes(".m3u8") || streamUrl.includes("/api/hls");
   const isPageUrl = !isHls && !streamUrl.match(/\.mp4|\.mpd/i);
 
   const {
