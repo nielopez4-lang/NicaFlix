@@ -2,7 +2,7 @@
 
 import {
   MONETAG_DIRECT_LINK,
-  buildSlotAdHtml,
+  buildNativeAdSlotHtml,
   getBannerInvokeUrl,
   getBannerZoneId,
 } from "@/lib/monetag";
@@ -14,11 +14,8 @@ type Props = {
   primary?: boolean;
 };
 
-const IFRAME_SANDBOX =
-  "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation-by-user-activation";
-
 /**
- * Muestra anuncios Monetag dentro del cuadro (banner nativo invoke.js).
+ * Banner nativo Monetag en iframe aislado (MultiTag + invoke.js).
  */
 export function MonetagNativeSlot({
   slotId,
@@ -30,32 +27,27 @@ export function MonetagNativeSlot({
   const invokeUrl = getBannerInvokeUrl();
   const height = primary ? minHeight : Math.min(minHeight, 120);
 
-  if (zone || MONETAG_DIRECT_LINK) {
-    const srcDoc = buildSlotAdHtml(
-      zone,
-      invokeUrl,
-      MONETAG_DIRECT_LINK,
-      height,
-    );
+  if (!zone) {
     return (
-      <iframe
-        key={slotId}
-        srcDoc={srcDoc}
-        title="Publicidad"
-        className={`w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f14] ${className}`}
-        style={{ minHeight: height, height, border: 0 }}
-        sandbox={IFRAME_SANDBOX}
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
+      <div
+        className={`rounded-2xl border border-white/5 bg-white/[0.02] ${className}`}
+        style={{ minHeight: height }}
+        aria-hidden
       />
     );
   }
 
+  const srcDoc = buildNativeAdSlotHtml(zone, height, invokeUrl);
+
   return (
-    <div
-      className={`rounded-2xl border border-white/5 bg-white/[0.02] ${className}`}
-      style={{ minHeight: height }}
-      aria-hidden
+    <iframe
+      key={slotId}
+      srcDoc={srcDoc}
+      title="Publicidad"
+      className={`w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f14] ${className}`}
+      style={{ minHeight: height, height, border: 0 }}
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
     />
   );
 }

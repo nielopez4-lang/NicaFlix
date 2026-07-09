@@ -106,80 +106,54 @@ export function buildBannerAdHtml(
   invokeUrl: string,
   minHeight = 250,
 ): string {
-  return buildSlotAdHtml(zone, invokeUrl, DIRECT_LINK_URL, minHeight);
+  return buildNativeAdSlotHtml(zone, minHeight, invokeUrl);
 }
 
-/** HTML para cuadros de anuncio: solo banner nativo Monetag (sin iframe Direct Link). */
-export function buildSlotAdHtml(
+/** HTML aislado por iframe: MultiTag + invoke.js → banner nativo Monetag. */
+export function buildNativeAdSlotHtml(
   zone: string,
-  invokeUrl: string,
-  directLinkUrl: string,
   minHeight = 250,
+  invokeUrl?: string,
 ): string {
-  const invokeTag = invokeUrl
-    ? `<script async="async" data-cfasync="false" src="${invokeUrl}"><\/script>`
-    : "";
-
-  const fallbackLink = directLinkUrl
-    ? `<a id="ad-fallback" class="ad-fallback" href="${directLinkUrl}" target="_blank" rel="noopener noreferrer sponsored">
-  <span class="ad-fallback-label">Publicidad</span>
-  <span class="ad-fallback-cta">Ver oferta patrocinada →</span>
-</a>`
-    : "";
+  const multitag =
+    getPublicEnv("NEXT_PUBLIC_MONETAG_SCRIPT_SRC") ||
+    MONETAG_DEFAULTS.multitagScript;
+  const invoke =
+    invokeUrl || getInvokeScriptUrl(zone);
 
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-${invokeTag}
+<link rel="preconnect" href="https://quge5.com"/>
+<link rel="preconnect" href="https://www.highperformanceformat.com"/>
+<script src="${multitag}" data-zone="${zone}" data-cfasync="false" async><\/script>
+<script async data-cfasync="false" src="${invoke}"><\/script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{min-height:100%;background:#0f0f14}
+  html,body{background:#0f0f14;overflow:hidden}
   #container-${zone}{
     min-height:${minHeight}px;
     width:100%;
     display:flex;
-    align-items:center;
+    align-items:stretch;
     justify-content:center;
   }
-  .ad-fallback{
-    display:none;
-    min-height:${minHeight}px;
-    width:100%;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    text-decoration:none;
-    background:linear-gradient(135deg,#1a1a24 0%,#0f0f14 100%);
-    border:1px dashed rgba(255,255,255,0.12);
-    color:#fff;
-    padding:16px;
-  }
-  .ad-fallback-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8b8b9a}
-  .ad-fallback-cta{font-size:15px;font-weight:600;color:#e50914}
-  .ad-fallback.visible{display:flex}
 </style>
 </head>
-<body>
-  <div id="container-${zone}"></div>
-  ${fallbackLink}
-  <script>
-    (function(){
-      var zone="${zone}";
-      var fb=document.getElementById("ad-fallback");
-      function showFallback(){
-        if(!fb) return;
-        var c=document.getElementById("container-"+zone);
-        if(c && c.children.length > 0) return;
-        fb.className="ad-fallback visible";
-      }
-      setTimeout(showFallback, 4000);
-    })();
-  <\/script>
-</body>
+<body><div id="container-${zone}"></div></body>
 </html>`;
+}
+
+/** @deprecated Usar buildNativeAdSlotHtml */
+export function buildSlotAdHtml(
+  zone: string,
+  invokeUrl: string,
+  _directLinkUrl: string,
+  minHeight = 250,
+): string {
+  return buildNativeAdSlotHtml(zone, minHeight, invokeUrl);
 }
 
 export const SITE_URL =

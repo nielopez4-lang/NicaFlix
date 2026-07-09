@@ -1,13 +1,13 @@
 import {
   DIRECT_LINK_URL,
-  buildSlotAdHtml,
+  buildNativeAdSlotHtml,
   getInvokeScriptUrl,
   resolveZoneId,
 } from "@/lib/monetag-config";
 
 export const dynamic = "force-dynamic";
 
-/** HTML embebible — In-Page Push banner dentro de cada iframe/cuadro. */
+/** HTML embebible — banner nativo Monetag (MultiTag + invoke.js). */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const zoneId = resolveZoneId(searchParams.get("zone"));
@@ -17,12 +17,9 @@ export async function GET(request: Request) {
   );
   const invokeUrl = zoneId ? getInvokeScriptUrl(zoneId) : "";
 
-  const body =
-    zoneId && (invokeUrl || DIRECT_LINK_URL)
-      ? buildSlotAdHtml(zoneId, invokeUrl, DIRECT_LINK_URL, minHeight)
-      : DIRECT_LINK_URL
-        ? buildSlotAdHtml("", "", DIRECT_LINK_URL, minHeight)
-        : `<!DOCTYPE html><html><body style="background:#0f0f14;min-height:${minHeight}px"></body></html>`;
+  const body = zoneId
+    ? buildNativeAdSlotHtml(zoneId, minHeight, invokeUrl)
+    : `<!DOCTYPE html><html><body style="background:#0f0f14;min-height:${minHeight}px"></body></html>`;
 
   return new Response(body, {
     headers: {

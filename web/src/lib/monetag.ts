@@ -9,6 +9,7 @@ export {
   SITE_URL,
   VIDEO_AD,
   buildBannerAdHtml,
+  buildNativeAdSlotHtml,
   buildSlotAdHtml,
   getInvokeScriptUrl,
   openDirectLink,

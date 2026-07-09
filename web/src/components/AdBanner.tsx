@@ -3,7 +3,7 @@
 import AdContainer from "@/components/AdContainer";
 import { MONETAG_ZONES } from "@/lib/monetag-config";
 
-/** Banner superior de la portada — mismo motor que el resto de cuadros. */
+/** Banner superior — nativo inline (mejor compatibilidad Monetag). */
 export function AdBanner({ className = "" }: { className?: string }) {
   return (
     <AdContainer
@@ -11,6 +11,7 @@ export function AdBanner({ className = "" }: { className?: string }) {
       slotKey="HOME_TOP"
       className={`mx-auto w-full max-w-6xl ${className}`.trim()}
       minHeight={250}
+      preferInline
     />
   );
 }
