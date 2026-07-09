@@ -4,12 +4,44 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+
+function channelLine(item: LiveChannel): string {
+  const parts = [
+    item.red,
+    item.pais,
+    item.categoria !== item.pais ? item.categoria : "",
+  ].filter(Boolean);
+  return [...new Set(parts)].join(" · ");
+}
+
+function ChannelGrid({
+  items,
+  onPress,
+}: {
+  items: LiveChannel[];
+  onPress: (id: string) => void;
+}) {
+  return (
+    <View style={styles.grid}>
+      {items.map((item) => (
+        <Pressable
+          key={item.id}
+          style={styles.channel}
+          onPress={() => onPress(item.id)}
+        >
+          <Text style={styles.name}>{item.nombre}</Text>
+          <Text style={styles.cat}>{channelLine(item)}</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
 
 export default function EnVivoScreen() {
   const router = useRouter();
@@ -31,35 +63,36 @@ export default function EnVivoScreen() {
     );
   }
 
+  const clasicos = lives.filter((ch) => ch.categoria === "Clásicos");
+  const otros = lives.filter((ch) => ch.categoria !== "Clásicos");
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scroll}>
       <Text style={styles.hint}>
-        {lives.length} canales — Nicaragua, LATAM y EE.UU. (iptv-org)
+        {lives.length} canales — El Chavo, Televisa, Canal 8, LATAM y EE.UU.
       </Text>
-      <FlatList
-        data={lives}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.grid}
-        renderItem={({ item }) => (
-          <Pressable style={styles.channel} onPress={() => router.push(`/live/${item.id}`)}>
-            <Text style={styles.name}>{item.nombre}</Text>
-            <Text style={styles.cat}>{item.pais}</Text>
-          </Pressable>
-        )}
-      />
-    </View>
+      {clasicos.length > 0 && (
+        <>
+          <Text style={styles.section}>Chespirito & clásicos</Text>
+          <ChannelGrid items={clasicos} onPress={(id) => router.push(`/live/${id}`)} />
+        </>
+      )}
+      <Text style={styles.section}>Más canales</Text>
+      <ChannelGrid items={otros} onPress={(id) => router.push(`/live/${id}`)} />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0B0B0F" },
+  scroll: { paddingBottom: 24 },
   center: { flex: 1, backgroundColor: "#0B0B0F", alignItems: "center", justifyContent: "center" },
   hint: { color: "#8B8B9A", padding: 16, fontSize: 13 },
-  grid: { padding: 12 },
+  section: { color: "#E50914", fontWeight: "700", fontSize: 16, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
+  grid: { flexDirection: "row", flexWrap: "wrap", padding: 8 },
   channel: {
-    flex: 1,
-    margin: 8,
+    width: "46%",
+    margin: "2%",
     backgroundColor: "#14141A",
     borderRadius: 16,
     padding: 16,

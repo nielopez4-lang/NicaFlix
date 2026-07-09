@@ -24,9 +24,10 @@ export async function loadLiveData(): Promise<{
     const lives: LiveChannel[] = canalesNicaragua.map((c) => ({
       id: c.id,
       nombre: c.nombre,
-      logo: `https://ui-avatars.com/api/?name=NI&background=E50914&color=fff`,
+      red: c.red,
+      logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombre.slice(0, 2))}&background=E50914&color=fff`,
       streamUrl: c.streamUrl,
-      categoria: c.pais,
+      categoria: c.categoria ?? c.pais,
       pais: c.pais,
     }));
     const deportesCanales: LiveChannel[] = deportesSeed.map((c) => ({

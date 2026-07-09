@@ -1,4 +1,5 @@
 import { fetchLiveChannels } from "@/lib/iptv";
+import { liveChannelSubtitle } from "@/lib/live-channels";
 import Link from "next/link";
 
 export async function LivePreview() {
@@ -17,14 +18,14 @@ export async function LivePreview() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
           {lives.map(
-            (ch: { id: string; nombre: string; pais: string }) => (
+            (ch: { id: string; nombre: string; red?: string; pais: string; categoria: string }) => (
               <Link
                 key={ch.id}
                 href={`/envivo/${ch.id}`}
                 className="glass rounded-xl p-4 transition hover:bg-white/10"
               >
                 <p className="font-semibold">{ch.nombre}</p>
-                <p className="text-xs text-brand-muted">{ch.pais}</p>
+                <p className="text-xs text-brand-muted">{liveChannelSubtitle(ch)}</p>
               </Link>
             ),
           )}
@@ -35,13 +36,14 @@ export async function LivePreview() {
             <h3 className="mb-4 mt-10 text-xl font-bold">Deportes / MLB</h3>
             <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
               {deportes.map(
-                (ch: { id: string; nombre: string }) => (
+                (ch: { id: string; nombre: string; red?: string; pais: string; categoria: string }) => (
                   <Link
                     key={ch.id}
                     href={`/envivo/${ch.id}`}
                     className="rounded-xl border border-brand-red/30 bg-brand-red/10 p-4 transition hover:bg-brand-red/20"
                   >
                     <p className="font-semibold">{ch.nombre}</p>
+                    <p className="text-xs text-brand-muted">{liveChannelSubtitle(ch)}</p>
                   </Link>
                 ),
               )}

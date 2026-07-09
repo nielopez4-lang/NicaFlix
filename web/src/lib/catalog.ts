@@ -1,5 +1,6 @@
 import { fetchArchiveCatalog, fetchJikanAnime } from "@/lib/archive";
 import { fetchFilmRiseCatalog } from "@/lib/filmrise";
+import { fetchHorrorCentralCatalog } from "@/lib/horror-central";
 import type { Categoria, CatalogResponse, ContentItem } from "@/types/content";
 
 const STAT_KEYS: Categoria[] = [
@@ -14,12 +15,13 @@ const STAT_KEYS: Categoria[] = [
 ];
 
 export async function fetchFullCatalog(): Promise<ContentItem[]> {
-  const [filmrise, archive, anime] = await Promise.all([
+  const [filmrise, horrorCentral, archive, anime] = await Promise.all([
     fetchFilmRiseCatalog(),
+    fetchHorrorCentralCatalog(),
     fetchArchiveCatalog(),
     fetchJikanAnime(),
   ]);
-  return [...filmrise, ...archive, ...anime];
+  return [...filmrise, ...horrorCentral, ...archive, ...anime];
 }
 
 export function buildCatalogStats(catalogo: ContentItem[]): CatalogResponse["stats"] {

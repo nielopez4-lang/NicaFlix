@@ -20,6 +20,11 @@ export default async function VerPage({ params }: Props) {
           {item.idioma === "es" ? " · Español" : " · Audio/subtítulos en reproductor"}
         </p>
       )}
+      {item.fuente === "horror-central" && (
+        <p className="mt-2 text-sm text-brand-muted">
+          Central de Películas - TERROR &amp; HORROR · YouTube HD · {item.anio} · Español
+        </p>
+      )}
       <p className="mt-4 text-brand-muted">{item.sinopsis}</p>
 
       <div className="mt-6 overflow-hidden rounded-2xl">

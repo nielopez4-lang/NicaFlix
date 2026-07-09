@@ -56,6 +56,16 @@ export const metadata: Metadata = {
 
     locale: "es_LA",
 
+    images: [{ url: "/logo.png", width: 512, height: 512, alt: "NicaFlix" }],
+
+  },
+
+  icons: {
+
+    icon: "/icon.png",
+
+    apple: "/apple-touch-icon.png",
+
   },
 
   other: {

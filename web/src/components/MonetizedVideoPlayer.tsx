@@ -1,7 +1,7 @@
 "use client";
 
 import { CastToTvButton } from "@/components/CastToTvButton";
-import { VideoAdGateModal } from "@/components/VideoAdGateModal";
+import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
 import { useVideoAdTriggers } from "@/hooks/useVideoAdTriggers";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -214,13 +214,11 @@ export function MonetizedVideoPlayer({
     (youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : undefined);
 
   return (
-    <>
-      <VideoAdGateModal
-        visible={gateOpen}
-        kind={gateKind}
-        onComplete={completeGate}
-      />
-
+    <SplitScreenAdPanel
+      visible={gateOpen}
+      kind={gateKind}
+      onComplete={completeGate}
+    >
       <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
         <CastToTvButton
           titulo={titulo}
@@ -302,6 +300,6 @@ export function MonetizedVideoPlayer({
           </>
         )}
       </div>
-    </>
+    </SplitScreenAdPanel>
   );
 }

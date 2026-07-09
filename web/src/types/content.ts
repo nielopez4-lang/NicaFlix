@@ -16,7 +16,7 @@ export type ContentItem = {
   categoria: Categoria;
   streamUrl?: string;
   youtubeId?: string;
-  fuente?: "filmrise" | "archive" | "jikan";
+  fuente?: "filmrise" | "horror-central" | "archive" | "jikan";
   idioma?: "es" | "multi" | "en";
   anio?: string;
 };
@@ -24,6 +24,8 @@ export type ContentItem = {
 export type LiveChannel = {
   id: string;
   nombre: string;
+  /** Cadena o marca: Televisa, Canal 8, TV Azteca, etc. */
+  red?: string;
   logo: string;
   streamUrl: string;
   categoria: string;

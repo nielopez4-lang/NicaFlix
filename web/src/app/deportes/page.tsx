@@ -1,4 +1,5 @@
 import { fetchLiveChannels } from "@/lib/iptv";
+import { liveChannelSubtitle } from "@/lib/live-channels";
 import { fetchSportsData } from "@/lib/sports";
 import { LiveScoreGrid, LiveScoreTicker } from "@/components/LiveScoreTicker";
 import { MlbStandingsPanel, SoccerStandingsPanel } from "@/components/StandingsTables";
@@ -64,7 +65,7 @@ export default async function DeportesPage() {
                 className="glass rounded-xl p-4 transition hover:bg-white/10"
               >
                 <p className="font-medium">{ch.nombre}</p>
-                <p className="text-xs text-brand-muted">{ch.pais}</p>
+                <p className="text-xs text-brand-muted">{liveChannelSubtitle(ch)}</p>
               </Link>
             ))}
           </div>

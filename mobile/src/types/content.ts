@@ -16,9 +16,19 @@ export type ContentItem = {
   categoria: Categoria;
   streamUrl?: string;
   youtubeId?: string;
-  fuente?: "filmrise" | "archive" | "jikan";
+  fuente?: "filmrise" | "horror-central" | "archive" | "jikan";
   idioma?: "es" | "multi" | "en";
   anio?: string;
+};
+
+export type LiveChannel = {
+  id: string;
+  nombre: string;
+  red?: string;
+  logo: string;
+  streamUrl: string;
+  categoria: string;
+  pais: string;
 };
 
 export type CatalogResponse = {
