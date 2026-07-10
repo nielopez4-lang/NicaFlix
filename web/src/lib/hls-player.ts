@@ -5,51 +5,63 @@ export type AttachHlsOptions = {
   video: HTMLVideoElement;
   onReady?: () => void;
   onFatalError?: () => void;
-  onNetworkRetry?: () => void;
 };
 
-/** Configura hls.js con reintentos para streams en vivo estables. */
+const MAX_NETWORK_RETRIES = 4;
+
+/** Configura hls.js con reintentos limitados para streams en vivo. */
 export async function attachLiveHls({
   url,
   video,
   onReady,
   onFatalError,
-  onNetworkRetry,
 }: AttachHlsOptions): Promise<Hls | null> {
   const HlsModule = (await import("hls.js")).default;
 
   if (!HlsModule.isSupported()) {
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = url;
-      onReady?.();
+      video.addEventListener("canplay", () => onReady?.(), { once: true });
     }
     return null;
   }
 
+  let networkRetries = 0;
+  let ready = false;
+
+  const markReady = () => {
+    if (ready) return;
+    ready = true;
+    onReady?.();
+  };
+
   const hls = new HlsModule({
-    enableWorker: typeof Worker !== "undefined",
+    enableWorker: false,
     lowLatencyMode: false,
-    maxBufferLength: 45,
-    maxMaxBufferLength: 90,
-    manifestLoadingMaxRetry: 6,
-    manifestLoadingRetryDelay: 1000,
-    levelLoadingMaxRetry: 6,
-    fragLoadingMaxRetry: 8,
-    fragLoadingRetryDelay: 1000,
+    maxBufferLength: 30,
+    manifestLoadingMaxRetry: 4,
+    levelLoadingMaxRetry: 4,
+    fragLoadingMaxRetry: 6,
   });
 
   hls.loadSource(url);
   hls.attachMedia(video);
 
-  hls.on(HlsModule.Events.MANIFEST_PARSED, () => {
-    onReady?.();
-  });
+  hls.on(HlsModule.Events.MANIFEST_PARSED, markReady);
+  hls.on(HlsModule.Events.LEVEL_LOADED, markReady);
+
+  video.addEventListener("canplay", markReady, { once: true });
 
   hls.on(HlsModule.Events.ERROR, (_event, data) => {
     if (!data.fatal) return;
 
     if (data.type === HlsModule.ErrorTypes.NETWORK_ERROR) {
-      onNetworkRetry?.();
+      networkRetries += 1;
+      if (networkRetries >= MAX_NETWORK_RETRIES) {
+        hls.destroy();
+        onFatalError?.();
+        return;
+      }
       hls.startLoad();
       return;
     }

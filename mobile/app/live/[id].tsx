@@ -6,7 +6,7 @@ import { findChannel } from "@/lib/content";
 import { useMobilePlaybackAds } from "@/hooks/useMobilePlaybackAds";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import type { LiveChannel } from "@/lib/content";
 
 export default function LivePlayerScreen() {
@@ -14,16 +14,12 @@ export default function LivePlayerScreen() {
   const [canal, setCanal] = useState<LiveChannel | null>(null);
   const [adDone, setAdDone] = useState(ads !== "1");
   const [loading, setLoading] = useState(true);
-  const { started, gateOpen, gateKind, requestPreroll, completeGate } =
+  const { started, gateOpen, gateKind, startLivePlayback, completeGate } =
     useMobilePlaybackAds();
 
   useEffect(() => {
     if (id) findChannel(id).then((c) => { setCanal(c ?? null); setLoading(false); });
   }, [id]);
-
-  useEffect(() => {
-    if (adDone && canal) requestPreroll();
-  }, [adDone, canal, requestPreroll]);
 
   if (loading) {
     return (
@@ -57,9 +53,10 @@ export default function LivePlayerScreen() {
             {started ? (
               <LicensedStreamPlayer streamUrl={canal.streamUrl} titulo={canal.nombre} />
             ) : (
-              <View style={styles.placeholder}>
-                <Text style={styles.placeholderText}>{canal.nombre}</Text>
-              </View>
+              <Pressable style={styles.placeholder} onPress={startLivePlayback}>
+                <Text style={styles.playIcon}>▶</Text>
+                <Text style={styles.placeholderText}>Ver en vivo</Text>
+              </Pressable>
             )}
           </SplitScreenAdGate>
           {started ? (
@@ -81,6 +78,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  placeholderText: { color: "#8B8B9A" },
+  playIcon: { color: "#E50914", fontSize: 48 },
+  placeholderText: { color: "#8B8B9A", marginTop: 8 },
   error: { color: "#fff" },
 });

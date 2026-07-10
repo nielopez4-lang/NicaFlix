@@ -70,6 +70,14 @@ export function useVideoAdTriggers({
     return v;
   }, [pendingStart]);
 
+  /** Inicia live sin pre-roll (mid-roll sigue activo cada 15 min). */
+  const startLivePlayback = useCallback(() => {
+    setGateOpen(false);
+    setStarted(true);
+    setPendingStart(true);
+    lastMidrollAtSecRef.current = 0;
+  }, []);
+
   /** Mid-roll cada 15 min — video sigue en la mitad izquierda */
   useEffect(() => {
     if (!enabled || !started) return;
@@ -94,6 +102,7 @@ export function useVideoAdTriggers({
     gateKind,
     requestPreroll,
     completeGate,
+    startLivePlayback,
     triggerMidroll,
     pendingStart,
     consumePendingStart,

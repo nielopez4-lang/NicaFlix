@@ -33,6 +33,14 @@ export function useMobilePlaybackAds(enabled = true) {
     }
   }, [started]);
 
+  /** Live: inicia sin pre-roll (solo mid-roll cada 15 min). */
+  const startLivePlayback = useCallback(() => {
+    setGateOpen(false);
+    setStarted(true);
+    lastMidrollRef.current = 0;
+    elapsedRef.current = 0;
+  }, []);
+
   useEffect(() => {
     if (!enabled || !started) return;
     const id = setInterval(() => {
@@ -56,5 +64,6 @@ export function useMobilePlaybackAds(enabled = true) {
     gateKind,
     requestPreroll,
     completeGate,
+    startLivePlayback,
   };
 }

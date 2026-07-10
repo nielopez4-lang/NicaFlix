@@ -18,6 +18,8 @@ type Props = {
   streamFallbacks?: string[];
 };
 
+const LOAD_TIMEOUT_MS = 12_000;
+
 function isHlsPlaybackUrl(url: string): boolean {
   return (
     url.includes(".m3u8") ||
@@ -53,7 +55,7 @@ function LivePlayerInner({
     started,
     gateOpen,
     gateKind,
-    requestPreroll,
+    startLivePlayback,
     completeGate,
     consumePendingStart,
   } = useLiveAdTriggers();
@@ -74,6 +76,7 @@ function LivePlayerInner({
     const nextIndex = sourceIndexRef.current + 1;
     if (nextIndex >= sources.length) {
       setPlaybackError(true);
+      setHlsLoading(false);
       return false;
     }
     sourceIndexRef.current = nextIndex;
@@ -87,19 +90,30 @@ function LivePlayerInner({
     sourceIndexRef.current = 0;
     setActiveStreamUrl(streamUrl);
     setPlaybackError(false);
+    setHlsLoading(false);
     setReloadKey((k) => k + 1);
   }, [streamUrl]);
 
   const startLive = useCallback(() => {
     setPlaybackError(false);
-    requestPreroll();
-  }, [requestPreroll]);
+    setHlsLoading(true);
+    startLivePlayback();
+  }, [startLivePlayback]);
 
   useEffect(() => {
     if (!started) return;
     if (gateOpen && gateKind === "preroll") return;
     if (consumePendingStart()) void videoRef.current?.play().catch(() => undefined);
   }, [started, gateOpen, gateKind, consumePendingStart]);
+
+  useEffect(() => {
+    if (!hlsLoading || !started) return;
+    const id = window.setTimeout(() => {
+      setHlsLoading(false);
+      if (!tryNextSource()) setPlaybackError(true);
+    }, LOAD_TIMEOUT_MS);
+    return () => window.clearTimeout(id);
+  }, [hlsLoading, started, tryNextSource, activeStreamUrl, reloadKey]);
 
   useEffect(() => {
     if (!isHls || !videoRef.current || !started) return;
@@ -116,14 +130,10 @@ function LivePlayerInner({
       onReady: () => {
         if (cancelled || loadToken !== loadTokenRef.current) return;
         setHlsLoading(false);
-      },
-      onNetworkRetry: () => {
-        if (cancelled || loadToken !== loadTokenRef.current) return;
-        setHlsLoading(true);
+        void video.play().catch(() => undefined);
       },
       onFatalError: () => {
         if (cancelled || loadToken !== loadTokenRef.current) return;
-        setHlsLoading(false);
         hlsRef.current?.destroy();
         hlsRef.current = null;
         if (!tryNextSource()) setPlaybackError(true);
@@ -140,13 +150,11 @@ function LivePlayerInner({
       })
       .catch(() => {
         if (cancelled || loadToken !== loadTokenRef.current) return;
-        setHlsLoading(false);
         if (!tryNextSource()) setPlaybackError(true);
       });
 
     return () => {
       cancelled = true;
-      setHlsLoading(false);
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
@@ -182,18 +190,21 @@ function LivePlayerInner({
       <video
         ref={videoRef}
         controls
-        autoPlay={started}
+        autoPlay
         playsInline
+        muted
         disableRemotePlayback={false}
         className="absolute inset-0 h-full w-full bg-black object-contain"
         src={isHls ? undefined : activeStreamUrl}
         title={titulo}
         onTimeUpdate={onVideoTimeUpdate}
         onPlaying={() => setHlsLoading(false)}
+        onCanPlay={() => setHlsLoading(false)}
       />
-      {hlsLoading ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+      {hlsLoading && started ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/80">
           <span className="h-10 w-10 animate-spin rounded-full border-2 border-brand-red border-t-transparent" />
+          <span className="text-xs text-brand-muted">Conectando señal…</span>
         </div>
       ) : null}
     </div>
