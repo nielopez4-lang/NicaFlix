@@ -28,6 +28,11 @@ export default async function VerPage({ params }: Props) {
           Central de Películas - TERROR &amp; HORROR · YouTube HD · {item.anio} · Español
         </p>
       )}
+      {item.fuente === "spanish-cinema" && (
+        <p className="mt-2 text-sm text-brand-muted">
+          Estreno en español · HD · YouTube · {item.anio}
+        </p>
+      )}
       {item.fuente === "archive" && (
         <p className="mt-2 text-sm text-brand-muted">
           Internet Archive · Dominio público · {item.categoria}

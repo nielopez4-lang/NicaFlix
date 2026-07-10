@@ -16,7 +16,7 @@ export type ContentItem = {
   categoria: Categoria;
   streamUrl?: string;
   youtubeId?: string;
-  fuente?: "filmrise" | "horror-central" | "archive" | "jikan";
+  fuente?: "filmrise" | "horror-central" | "archive" | "jikan" | "spanish-cinema";
   idioma?: "es" | "multi" | "en";
   anio?: string;
 };

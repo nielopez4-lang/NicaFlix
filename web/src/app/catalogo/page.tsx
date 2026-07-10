@@ -13,8 +13,8 @@ export default async function CatalogoPage() {
     <main className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="text-4xl font-bold">Catálogo completo</h1>
       <p className="mt-2 text-brand-muted">
-        {catalogo.length} títulos — FilmRise (YouTube), Internet Archive y
-        anime
+        {catalogo.length} títulos — estrenos en español HD, FilmRise, Internet
+        Archive y anime
       </p>
 
       <AdSlot slot="CATALOG_TOP" className="my-8" />
@@ -38,6 +38,9 @@ export default async function CatalogoPage() {
                     unoptimized
                   />
                   <p className="mt-2 line-clamp-2 text-sm">{item.titulo}</p>
+                  {item.fuente === "spanish-cinema" && (
+                    <p className="text-xs text-brand-red">Estreno ES · HD · {item.anio}</p>
+                  )}
                   {item.fuente === "filmrise" && (
                     <p className="text-xs text-brand-muted">FilmRise · {item.anio}</p>
                   )}
