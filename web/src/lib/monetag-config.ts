@@ -35,11 +35,11 @@ export const DIRECT_LINK_URL =
 /** Triggers automáticos en reproductor */
 export const VIDEO_AD = {
   prerollSeconds: 10,
-  /** Segundos que permanece visible el panel de anuncio en mid-roll (video sigue) */
-  midrollDisplaySec: 15,
+  /** Segundos visibles en mid-roll (estilo NBC Playing Through) */
+  midrollDisplaySec: 30,
   midrollIntervalMs: 15 * 60 * 1000,
   midrollIntervalSec: 15 * 60,
-  midrollCheckMs: 20_000,
+  midrollCheckMs: 5_000,
 } as const;
 
 const zoneId = primaryZoneId();

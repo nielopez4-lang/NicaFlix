@@ -13,6 +13,26 @@ export const canalesNicaragua = [
     categoria: "Entretenimiento",
   },
   {
+    id: "do-teleantillas10",
+    nombre: "Tele Antillas Canal 10",
+    red: "Grupo Corripio",
+    streamUrl: normalizeStreamUrl(
+      "http://45.171.108.253:8888/TELEANTILLAS/index.m3u8",
+    ),
+    pais: "Rep. Dominicana",
+    categoria: "República Dominicana",
+  },
+  {
+    id: "do-coral39",
+    nombre: "Coral Canal 39",
+    red: "Grupo Corripio",
+    streamUrl: normalizeStreamUrl(
+      "http://190.110.36.254:80/CORAL39/index.m3u8",
+    ),
+    pais: "Rep. Dominicana",
+    categoria: "República Dominicana",
+  },
+  {
     id: "mx-chavo",
     nombre: "El Chavo del 8",
     red: "El Chavo TV",

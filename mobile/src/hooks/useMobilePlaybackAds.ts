@@ -1,20 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { VIDEO_AD, openDirectLink } from "@/lib/monetag";
+import { VIDEO_AD } from "@/lib/monetag";
 
 export type MobileAdKind = "preroll" | "midroll";
 
+/** Mid-roll cada 15 min — pantalla 50/50, contenido sigue reproduciéndose. */
 export function useMobilePlaybackAds(enabled = true) {
   const [started, setStarted] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [gateKind, setGateKind] = useState<MobileAdKind>("preroll");
   const elapsedRef = useRef(0);
   const lastMidrollRef = useRef(0);
-  const linkOpenedRef = useRef(false);
 
   const openGate = useCallback((kind: MobileAdKind) => {
     setGateKind(kind);
     setGateOpen(true);
-    linkOpenedRef.current = false;
   }, []);
 
   const requestPreroll = useCallback(() => {
@@ -27,7 +26,6 @@ export function useMobilePlaybackAds(enabled = true) {
 
   const completeGate = useCallback(() => {
     setGateOpen(false);
-    linkOpenedRef.current = false;
     if (!started) {
       setStarted(true);
       lastMidrollRef.current = 0;
@@ -36,22 +34,19 @@ export function useMobilePlaybackAds(enabled = true) {
   }, [started]);
 
   useEffect(() => {
-    if (!gateOpen || linkOpenedRef.current) return;
-    linkOpenedRef.current = true;
-    openDirectLink();
-  }, [gateOpen]);
-
-  useEffect(() => {
-    if (!enabled || !started || gateOpen) return;
+    if (!enabled || !started) return;
     const id = setInterval(() => {
       elapsedRef.current += 1;
+      if (gateOpen) return;
       const elapsed = elapsedRef.current;
-      const intervalSec = VIDEO_AD.midrollIntervalMs / 1000;
-      if (elapsed > 0 && elapsed - lastMidrollRef.current >= intervalSec) {
+      if (
+        elapsed > 0 &&
+        elapsed - lastMidrollRef.current >= VIDEO_AD.midrollIntervalSec
+      ) {
         lastMidrollRef.current = elapsed;
         openGate("midroll");
       }
-    }, 20_000);
+    }, 1000);
     return () => clearInterval(id);
   }, [enabled, started, gateOpen, openGate]);
 

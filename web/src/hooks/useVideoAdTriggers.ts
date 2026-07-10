@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   VIDEO_AD,
-  openDirectLink,
 } from "@/lib/monetag-config";
 
 export type AdGateKind = "preroll" | "midroll";
@@ -16,8 +15,8 @@ type Options = {
 
 /**
  * Gatillos Monetag para reproductor universal (YouTube + HTML5).
- * - Pre-roll: abre Direct Link + modal; al completar inicia reproducción.
- * - Mid-roll: cada 15 min de reproducción pausa y abre Direct Link.
+ * - Pre-roll: pantalla dividida; al completar inicia reproducción.
+ * - Mid-roll: cada 15 min, pantalla 50/50 — anuncio + programa sin pausar.
  */
 export function useVideoAdTriggers({
   watchPositionRef,
@@ -27,15 +26,12 @@ export function useVideoAdTriggers({
   const [gateOpen, setGateOpen] = useState(false);
   const [gateKind, setGateKind] = useState<AdGateKind>("preroll");
   const [pendingStart, setPendingStart] = useState(false);
-  const [pendingResume, setPendingResume] = useState(false);
 
   const lastMidrollAtSecRef = useRef(0);
-  const linkOpenedRef = useRef(false);
 
   const openGate = useCallback((kind: AdGateKind) => {
     setGateKind(kind);
     setGateOpen(true);
-    linkOpenedRef.current = false;
   }, []);
 
   const requestPreroll = useCallback(() => {
@@ -55,17 +51,11 @@ export function useVideoAdTriggers({
 
   const completeGate = useCallback(() => {
     setGateOpen(false);
-    linkOpenedRef.current = false;
 
     if (gateKind === "preroll" && !started) {
       setStarted(true);
       setPendingStart(true);
       lastMidrollAtSecRef.current = 0;
-      return;
-    }
-
-    if (gateKind === "midroll") {
-      setPendingResume(true);
     }
   }, [gateKind, started]);
 
@@ -75,24 +65,12 @@ export function useVideoAdTriggers({
     return v;
   }, [pendingStart]);
 
-  const consumePendingResume = useCallback(() => {
-    const v = pendingResume;
-    if (v) setPendingResume(false);
-    return v;
-  }, [pendingResume]);
-
-  /** Abre Direct Link una sola vez al mostrar el modal */
+  /** Mid-roll cada 15 min — video sigue en la mitad izquierda */
   useEffect(() => {
-    if (!gateOpen || linkOpenedRef.current) return;
-    linkOpenedRef.current = true;
-    openDirectLink();
-  }, [gateOpen]);
-
-  /** Mid-roll: temporizador ligero sobre tiempo de reproducción real */
-  useEffect(() => {
-    if (!enabled || !started || gateOpen) return;
+    if (!enabled || !started) return;
 
     const id = window.setInterval(() => {
+      if (gateOpen) return;
       const pos = watchPositionRef.current ?? 0;
       if (
         pos > 0 &&
@@ -113,8 +91,6 @@ export function useVideoAdTriggers({
     completeGate,
     triggerMidroll,
     pendingStart,
-    pendingResume,
     consumePendingStart,
-    consumePendingResume,
   };
 }

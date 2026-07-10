@@ -122,6 +122,27 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     pais: "Colombia",
   },
   {
+    id: "do-teleantillas10",
+    nombre: "Tele Antillas Canal 10",
+    red: "Grupo Corripio",
+    streamUrl: normalizeStreamUrl(
+      "http://45.171.108.253:8888/TELEANTILLAS/index.m3u8",
+    ),
+    streamFallbacks: ["https://teleantillas.com.do/en-vivo/"],
+    categoria: "República Dominicana",
+    pais: "Rep. Dominicana",
+  },
+  {
+    id: "do-coral39",
+    nombre: "Coral Canal 39",
+    red: "Grupo Corripio",
+    streamUrl: normalizeStreamUrl(
+      "http://190.110.36.254:80/CORAL39/index.m3u8",
+    ),
+    categoria: "República Dominicana",
+    pais: "Rep. Dominicana",
+  },
+  {
     id: "ni-tn8",
     nombre: "TN8",
     red: "Nicaragua",
@@ -318,6 +339,7 @@ export function inferChannelNetwork(nombre: string): string | undefined {
   if (/tn8|canal 4|canal 6|canal 13|canal 15|viva nicaragua/.test(n))
     return "Nicaragua";
   if (/canal 55|telemorisco/.test(n)) return "Canal 55 · Telemorisco TV";
+  if (/tele antillas|coral 39|telesistema/.test(n)) return "Grupo Corripio";
   if (/rcn|caracol|city tv|canal 1|win sports/.test(n)) return "Colombia";
   return undefined;
 }

@@ -2,6 +2,7 @@
 
 import { CastToTvButton } from "@/components/CastToTvButton";
 import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
+import { useKeepPlayingDuringMidroll } from "@/hooks/useKeepPlayingDuringMidroll";
 import { useVideoAdTriggers } from "@/hooks/useVideoAdTriggers";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -88,19 +89,20 @@ export function MonetizedVideoPlayer({
     requestPreroll,
     completeGate,
     consumePendingStart,
-    consumePendingResume,
   } = useVideoAdTriggers({ watchPositionRef });
+
+  useKeepPlayingDuringMidroll({
+    gateOpen,
+    gateKind,
+    videoRef,
+    ytPlayerRef,
+  });
 
   const clearYtPoll = useCallback(() => {
     if (ytPollRef.current) {
       clearInterval(ytPollRef.current);
       ytPollRef.current = null;
     }
-  }, []);
-
-  const pausePlayback = useCallback(() => {
-    videoRef.current?.pause();
-    ytPlayerRef.current?.pauseVideo();
   }, []);
 
   const startYtPositionPoll = useCallback(() => {
@@ -164,29 +166,11 @@ export function MonetizedVideoPlayer({
     return startHtml5Playback();
   }, [youtubeId, mountYouTubePlayer, startHtml5Playback]);
 
-  const resumePlayback = useCallback(() => {
-    if (videoRef.current) {
-      void videoRef.current.play().catch(() => setPlayerError(true));
-    }
-    ytPlayerRef.current?.playVideo();
-  }, []);
-
   useEffect(() => {
-    if (gateOpen && gateKind === "midroll") pausePlayback();
-  }, [gateOpen, gateKind, pausePlayback]);
-
-  useEffect(() => {
-    if (!started || gateOpen) return;
+    if (!started) return;
+    if (gateOpen && gateKind === "preroll") return;
     if (consumePendingStart()) void startPlayback();
-    if (consumePendingResume()) resumePlayback();
-  }, [
-    started,
-    gateOpen,
-    consumePendingStart,
-    consumePendingResume,
-    startPlayback,
-    resumePlayback,
-  ]);
+  }, [started, gateOpen, gateKind, consumePendingStart, startPlayback]);
 
   useEffect(
     () => () => {
@@ -219,14 +203,14 @@ export function MonetizedVideoPlayer({
       kind={gateKind}
       onComplete={completeGate}
     >
-      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+      <div className="relative h-full min-h-[160px] w-full overflow-hidden bg-black">
         <CastToTvButton
           titulo={titulo}
           streamUrl={streamUrl}
           youtubeId={youtubeId}
           poster={thumb}
           videoRef={videoRef}
-          visible={started && !gateOpen}
+          visible={started}
         />
         {!started ? (
           <button

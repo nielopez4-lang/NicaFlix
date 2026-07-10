@@ -2,6 +2,7 @@
 
 import { CastToTvButton } from "@/components/CastToTvButton";
 import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
+import { useKeepPlayingDuringMidroll } from "@/hooks/useKeepPlayingDuringMidroll";
 import { useLiveAdTriggers } from "@/hooks/useLiveAdTriggers";
 import {
   isDailyMotionEmbedUrl,
@@ -54,6 +55,12 @@ export function MonetizedLivePlayer({
     completeGate,
     consumePendingStart,
   } = useLiveAdTriggers();
+
+  useKeepPlayingDuringMidroll({
+    gateOpen,
+    gateKind,
+    videoRef,
+  });
 
   useEffect(() => {
     sourceIndexRef.current = 0;

@@ -7,15 +7,15 @@ import { useEffect, useRef } from "react";
 export function useLiveAdTriggers(enabled = true) {
   const watchPositionRef = useRef(0);
   const triggers = useVideoAdTriggers({ watchPositionRef, enabled });
-  const { started, gateOpen } = triggers;
+  const { started } = triggers;
 
   useEffect(() => {
-    if (!started || gateOpen) return;
+    if (!started) return;
     const id = window.setInterval(() => {
       watchPositionRef.current += 1;
     }, 1000);
     return () => window.clearInterval(id);
-  }, [started, gateOpen]);
+  }, [started]);
 
   return { watchPositionRef, ...triggers };
 }
