@@ -1,10 +1,11 @@
 import type { ContentItem } from "@/types/content";
-
-/** Central de Películas - TERROR & HORROR (@centralterrorhorror) */
-const HORROR_CHANNEL_ID = "UCZ1SEglncZ8j3v7gygwH_gg";
+import { filterPlayableIds } from "@/lib/youtube-embed";
 
 /** Playlist: PELÍCULAS COMPLETAS EN ESPAÑOL */
 const HORROR_ES_PLAYLIST = "PLuh7PPu5CNS9eoBivnV_eze85iPao9UcD";
+
+/** Canal Central Terror — subidas recientes en español */
+const HORROR_CHANNEL_ID = "UCZ1SEglncZ8j3v7gygwH_gg";
 
 type RssVideo = {
   id: string;
@@ -124,7 +125,17 @@ export async function fetchHorrorCentralCatalog(): Promise<ContentItem[]> {
     }
   }
 
-  return [...byId.values()]
+  const candidates = [...byId.values()]
     .map(toContentItem)
-    .sort((a, b) => (b.anio ?? "").localeCompare(a.anio ?? ""));
+    .sort((a, b) => (b.anio ?? "").localeCompare(a.anio ?? ""))
+    .slice(0, 35);
+
+  if (candidates.length === 0) return [];
+
+  const playable = await filterPlayableIds(
+    candidates.map((item) => item.youtubeId!),
+    5,
+  );
+
+  return candidates.filter((item) => playable.has(item.youtubeId!));
 }

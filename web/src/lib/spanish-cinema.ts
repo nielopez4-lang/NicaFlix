@@ -1,20 +1,13 @@
 import type { Categoria, ContentItem } from "@/types/content";
+import { filterPlayableIds } from "@/lib/youtube-embed";
 import { fetchYoutubeRss, type RssVideo } from "@/lib/youtube-rss";
 
-/** Canales con películas completas recientes en español (YouTube RSS oficial). */
+/**
+ * Solo canales/playlists cuyos videos pasan verificación de reproducción.
+ * horror-es eliminado (duplica horror-central / hc-*).
+ * vespanol eliminado (canal RSS caído).
+ */
 const SPANISH_MOVIE_FEEDS: Array<{ source: string; url: string }> = [
-  {
-    source: "megacine",
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC6ZcZrCYzfM8fNoO7gD1YkA",
-  },
-  {
-    source: "netmovies",
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCLIPxE1nQC-mv3Mx3HusUoA",
-  },
-  {
-    source: "vespanol",
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCH6uKFPQcZLihwbnzxnw1dA",
-  },
   {
     source: "wowcine",
     url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCrZKOE8p9y-UtDelMHVC3-A",
@@ -29,55 +22,61 @@ const SPANISH_MOVIE_FEEDS: Array<{ source: string; url: string }> = [
   },
 ];
 
-const SPANISH_BRAND_SOURCES = new Set([
-  "megacine",
-  "netmovies",
-  "vespanol",
-  "suspenso",
-  "romance2026",
-]);
+const TRUSTED_SOURCES = new Set(["wowcine", "suspenso", "romance2026"]);
+
+/** Agregadores geo-bloqueados o spam de título — nunca listar. */
+const BLOCKED_TITLE_PATTERN =
+  /netmovies|megacine|wowcine full|pel[ií]cula completa de\s+(acci[oó]n|romance|terror|suspenso|aventura|drama|ficci)/i;
 
 function isSpanishFullMovie(video: RssVideo, source: string): boolean {
+  if (BLOCKED_TITLE_PATTERN.test(video.title)) return false;
+
   const text = `${video.title} ${video.desc}`.toLowerCase();
   const isFull =
     /pel[ií]cula completa|pelicula completa|full movie|pel[ií]cula de |pelicula de /.test(
       text,
     );
   const isSpanish =
-    SPANISH_BRAND_SOURCES.has(source) ||
+    TRUSTED_SOURCES.has(source) ||
     /español|espanol|latino|castellano|#peliculascompletas|peliculas completas en/.test(
       text,
     );
   return isFull && isSpanish;
 }
 
-function isHdOrRecent(video: RssVideo, source: string): boolean {
-  if (source === "megacine") return true;
+function isHdOrRecent(video: RssVideo): boolean {
   const text = `${video.title} ${video.desc}`.toLowerCase();
   if (/1080|720|\bhd\b|4k|full hd|alta definici/i.test(text)) return true;
   const year = Number.parseInt(video.published.slice(0, 4), 10);
   return Number.isFinite(year) && year >= 2024;
 }
 
-function cleanTitle(title: string): string {
-  return title
-    .replace(/\s*PELA?CULA COMPLETA DE [A-ZÁÉÍÓÚÑ]+.*$/i, "")
-    .replace(/\s*NetMovies\s*-?\s*Pel[ií]culas En Espa[nñ]ol.*$/i, "")
-    .replace(/\s*[|｜]\s*HD\s*[|｜].*$/i, "")
-    .replace(/\s*[|｜]\s*PELICULA COMPLETA.*$/i, "")
-    .replace(/\s*[|｜]\s*Pel[ií]cula Completa.*$/i, "")
-    .replace(/\s*[|｜]\s*Pelicula de .*$/i, "")
+export function cleanSpanishMovieTitle(title: string): string {
+  let t = title
+    .replace(/[\u{1F300}-\u{1FAFF}\u2600-\u26FF]/gu, "")
     .replace(/\s*#\S+/g, "")
-    .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
+    .replace(/\s*\?\?\s*/g, " ");
+
+  t = t.replace(
+    /\s*PEL[IÍA]?CULA\s+COMPLETA\s+DE\s+[A-ZÁÉÍÓÚÜÑa-záéíóúüñ]+\s*/gi,
+    "",
+  );
+  t = t.replace(/\s*NetMovies[\s\S]*$/i, "");
+  t = t.replace(/\s*Pel[ií]culas?\s+Completas?\s+En\s+Espa[nñ]ol[\s\S]*$/i, "");
+  t = t.replace(/\s*[|｜]\s*HD\s*[|｜].*$/i, "");
+  t = t.replace(/\s*[|｜]\s*PELICULA COMPLETA.*$/i, "");
+  t = t.replace(/\s*[|｜]\s*Pel[ií]cula Completa.*$/i, "");
+  t = t.replace(/\s*[|｜]\s*Pel[ií]cula de .*$/i, "");
+  t = t.replace(/\s*\|\s*Pel[ií]cula Completa.*$/i, "");
+
+  return t.replace(/\s+/g, " ").trim();
 }
 
 function classifyGenre(video: RssVideo): Categoria {
   const text = `${video.title} ${video.desc}`.toLowerCase();
 
   if (
-    /terror|horror|miedo|suspenso|suspense|psicol[oó]gic|slasher|vampir|monstruo|fantasm|dr[aá]cula|misterio|mister/i.test(
+    /terror|horror|miedo|suspenso|suspense|psicol[oó]gic|slasher|vampir|monstruo|fantasm|dr[aá]cula|misterio|mister|culto|drácula/.test(
       text,
     )
   ) {
@@ -85,7 +84,7 @@ function classifyGenre(video: RssVideo): Categoria {
   }
 
   if (
-    /comedia|comedy|risa|humor|romance|romantic|amor|enamor|pareja|boda/i.test(
+    /comedia|comedy|risa|humor|romance|romantic|amor|enamor|pareja|boda|atardecer/.test(
       text,
     )
   ) {
@@ -93,7 +92,7 @@ function classifyGenre(video: RssVideo): Categoria {
   }
 
   if (
-    /familia|family|infantil|niñ|animaci[oó]n|aventura familiar|drama familiar/i.test(
+    /familia|family|infantil|niñ|animaci[oó]n|aventura familiar|drama familiar/.test(
       text,
     )
   ) {
@@ -101,7 +100,7 @@ function classifyGenre(video: RssVideo): Categoria {
   }
 
   if (
-    /accion|acción|action|aventura|thriller|guerra|fight|combat|polic|crimen|western|ciencia fic|sci-fi|espacio/i.test(
+    /accion|acción|action|aventura|thriller|guerra|fight|combat|polic|crimen|western|ciencia fic|sci-fi|espacio|jeric|cerbero/.test(
       text,
     )
   ) {
@@ -114,12 +113,13 @@ function classifyGenre(video: RssVideo): Categoria {
 function toContentItem(video: RssVideo, categoria: Categoria): ContentItem {
   const year = video.published.slice(0, 4);
   const month = video.published.slice(5, 7);
+  const titulo = cleanSpanishMovieTitle(video.title);
   return {
     id: `es-${video.id}`,
-    titulo: cleanTitle(video.title),
+    titulo: titulo || video.title.slice(0, 80),
     sinopsis:
       video.desc.slice(0, 240) ||
-      `Película completa en español (${year}). Estreno reciente en HD vía YouTube.`,
+      `Película completa en español (${year}). HD vía YouTube.`,
     portada: `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`,
     categoria,
     youtubeId: video.id,
@@ -129,7 +129,7 @@ function toContentItem(video: RssVideo, categoria: Categoria): ContentItem {
   };
 }
 
-/** Películas recientes en español HD (2024–2026) desde canales oficiales de YouTube. */
+/** Películas en español — solo las verificadas como reproducibles en YouTube. */
 export async function fetchSpanishCinemaCatalog(): Promise<ContentItem[]> {
   const batches = await Promise.all(
     SPANISH_MOVIE_FEEDS.map(async ({ source, url }) => ({
@@ -146,7 +146,7 @@ export async function fetchSpanishCinemaCatalog(): Promise<ContentItem[]> {
   for (const { source, videos } of batches) {
     for (const video of videos) {
       if (!isSpanishFullMovie(video, source)) continue;
-      if (!isHdOrRecent(video, source)) continue;
+      if (!isHdOrRecent(video)) continue;
 
       const categoria = classifyGenre(video);
       const existing = byId.get(video.id);
@@ -167,8 +167,17 @@ export async function fetchSpanishCinemaCatalog(): Promise<ContentItem[]> {
     }
   }
 
-  return [...byId.values()]
+  const candidates = [...byId.values()]
     .map(({ video, categoria }) => toContentItem(video, categoria))
     .sort((a, b) => (b.anio ?? "").localeCompare(a.anio ?? ""))
-    .slice(0, 90);
+    .slice(0, 40);
+
+  if (candidates.length === 0) return [];
+
+  const playable = await filterPlayableIds(
+    candidates.map((item) => item.youtubeId!),
+    5,
+  );
+
+  return candidates.filter((item) => playable.has(item.youtubeId!)).slice(0, 25);
 }

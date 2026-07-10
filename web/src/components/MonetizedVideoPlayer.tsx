@@ -4,6 +4,7 @@ import { CastToTvButton } from "@/components/CastToTvButton";
 import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
 import { useKeepPlayingDuringMidroll } from "@/hooks/useKeepPlayingDuringMidroll";
 import { useVideoAdTriggers } from "@/hooks/useVideoAdTriggers";
+import { youtubeWatchUrl } from "@/lib/cast";
 import {
   isMobileDevice,
   youtubeEmbedUrl,
@@ -45,6 +46,10 @@ type YtPlayer = {
   destroy: () => void;
 };
 
+type YoutubePlayback = "idle" | "api" | "iframe" | "failed";
+
+const YT_API_TIMEOUT_MS = 10_000;
+
 function loadYouTubeApi(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.YT?.Player) return Promise.resolve();
@@ -80,15 +85,17 @@ export function MonetizedVideoPlayer({
 }: Props) {
   const watchPositionRef = useRef(0);
   const [playerReady, setPlayerReady] = useState(false);
-  const [playerError, setPlayerError] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  /** iOS/Android: iframe YouTube en el mismo gesto del usuario (autoplay permitido). */
-  const [mobileEmbedSrc, setMobileEmbedSrc] = useState<string | null>(null);
+  const [youtubePlayback, setYoutubePlayback] =
+    useState<YoutubePlayback>("idle");
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+  const [html5Error, setHtml5Error] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const ytContainerRef = useRef<HTMLDivElement>(null);
   const ytPlayerRef = useRef<YtPlayer | null>(null);
   const ytPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fallbackTriggeredRef = useRef(false);
 
   const {
     started,
@@ -97,7 +104,6 @@ export function MonetizedVideoPlayer({
     requestPreroll,
     completeGate,
     consumePendingStart,
-    startLivePlayback,
   } = useVideoAdTriggers({ watchPositionRef });
 
   useEffect(() => {
@@ -126,9 +132,25 @@ export function MonetizedVideoPlayer({
     }, 5000);
   }, [clearYtPoll]);
 
+  const startYoutubeIframe = useCallback(() => {
+    if (!youtubeId) return;
+    fallbackTriggeredRef.current = true;
+    ytPlayerRef.current?.destroy();
+    ytPlayerRef.current = null;
+    clearYtPoll();
+    setYoutubePlayback("iframe");
+    setIframeSrc(youtubeEmbedUrl(youtubeId, true));
+    setPlayerReady(true);
+  }, [youtubeId, clearYtPoll]);
+
+  const markYoutubeFailed = useCallback(() => {
+    setYoutubePlayback("failed");
+    setPlayerReady(false);
+  }, []);
+
   const mountYouTubePlayer = useCallback(async () => {
     if (!youtubeId || !ytContainerRef.current) return false;
-    setPlayerError(false);
+    setYoutubePlayback("api");
     try {
       await loadYouTubeApi();
       ytPlayerRef.current?.destroy();
@@ -153,17 +175,23 @@ export function MonetizedVideoPlayer({
             }
           },
           onError: () => {
-            setPlayerError(true);
-            setPlayerReady(false);
+            if (!fallbackTriggeredRef.current) startYoutubeIframe();
+            else markYoutubeFailed();
           },
         },
       });
       return true;
     } catch {
-      setPlayerError(true);
+      if (!fallbackTriggeredRef.current) startYoutubeIframe();
+      else markYoutubeFailed();
       return false;
     }
-  }, [youtubeId, startYtPositionPoll]);
+  }, [
+    youtubeId,
+    startYtPositionPoll,
+    startYoutubeIframe,
+    markYoutubeFailed,
+  ]);
 
   const startHtml5Playback = useCallback(async () => {
     const v = videoRef.current;
@@ -174,50 +202,55 @@ export function MonetizedVideoPlayer({
       setPlayerReady(true);
       return true;
     } catch {
-      setPlayerError(true);
       return false;
     }
   }, []);
 
-  const startPlayback = useCallback(async () => {
-    if (mobileEmbedSrc) {
-      setPlayerReady(true);
-      return true;
-    }
-    if (youtubeId) return mountYouTubePlayer();
-    return startHtml5Playback();
-  }, [youtubeId, mobileEmbedSrc, mountYouTubePlayer, startHtml5Playback]);
+  const beginPlayback = useCallback(async () => {
+    fallbackTriggeredRef.current = false;
+    setPlayerReady(false);
+    setHtml5Error(false);
 
-  const handlePlayTap = useCallback(() => {
-    setPlayerError(false);
-
-    if (isMobile) {
-      startLivePlayback();
-      if (youtubeId) {
-        setMobileEmbedSrc(youtubeEmbedUrl(youtubeId, true));
-        setPlayerReady(true);
+    if (youtubeId) {
+      if (isMobile) {
+        startYoutubeIframe();
         return;
       }
-      void startHtml5Playback();
+      await mountYouTubePlayer();
       return;
     }
 
+    await startHtml5Playback();
+  }, [youtubeId, isMobile, startYoutubeIframe, mountYouTubePlayer, startHtml5Playback]);
+
+  const handlePlayTap = useCallback(() => {
+    setYoutubePlayback("idle");
+    setIframeSrc(null);
     requestPreroll();
-  }, [isMobile, youtubeId, startLivePlayback, requestPreroll, startHtml5Playback]);
+  }, [requestPreroll]);
 
   useEffect(() => {
     if (!started) return;
     if (gateOpen && gateKind === "preroll") return;
-    if (mobileEmbedSrc) return;
-    if (consumePendingStart()) void startPlayback();
-  }, [
-    started,
-    gateOpen,
-    gateKind,
-    consumePendingStart,
-    startPlayback,
-    mobileEmbedSrc,
-  ]);
+    if (consumePendingStart()) void beginPlayback();
+  }, [started, gateOpen, gateKind, consumePendingStart, beginPlayback]);
+
+  useEffect(() => {
+    if (
+      !started ||
+      youtubePlayback !== "api" ||
+      playerReady ||
+      fallbackTriggeredRef.current
+    ) {
+      return;
+    }
+    const id = window.setTimeout(() => {
+      if (!playerReady && !fallbackTriggeredRef.current) {
+        startYoutubeIframe();
+      }
+    }, YT_API_TIMEOUT_MS);
+    return () => window.clearTimeout(id);
+  }, [started, youtubePlayback, playerReady, startYoutubeIframe]);
 
   useEffect(
     () => () => {
@@ -244,7 +277,12 @@ export function MonetizedVideoPlayer({
     portada ??
     (youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : undefined);
 
-  const showMobileIframe = started && youtubeId && mobileEmbedSrc;
+  const showYoutubeIframe =
+    started && youtubeId && youtubePlayback === "iframe" && iframeSrc;
+  const showYoutubeFailed = started && youtubeId && youtubePlayback === "failed";
+  const showYoutubeApi =
+    started && youtubeId && youtubePlayback === "api" && !showYoutubeIframe;
+  const showHtml5 = started && !youtubeId && streamUrl;
 
   return (
     <SplitScreenAdPanel
@@ -284,47 +322,31 @@ export function MonetizedVideoPlayer({
               Toca para reproducir
             </span>
           </button>
-        ) : showMobileIframe ? (
+        ) : showYoutubeIframe ? (
           <iframe
             title={titulo}
-            src={mobileEmbedSrc}
+            src={iframeSrc!}
             className="absolute inset-0 h-full w-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             referrerPolicy="strict-origin-when-cross-origin"
           />
-        ) : youtubeId ? (
+        ) : showYoutubeApi ? (
           <>
-            <div ref={ytContainerRef} className="h-full w-full" title={titulo} />
-            {!playerReady && !playerError && (
+            <div
+              ref={ytContainerRef}
+              className="absolute inset-0 h-full w-full"
+              title={titulo}
+            />
+            {!playerReady && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/80">
                 <span className="h-8 w-8 animate-spin rounded-full border-2 border-brand-red border-t-transparent" />
               </div>
             )}
-            {playerError && (
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/90 px-4 text-center">
-                <p className="text-sm text-brand-muted">
-                  No se pudo reproducir en YouTube. Prueba de nuevo.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPlayerError(false);
-                    if (isMobile && youtubeId) {
-                      setMobileEmbedSrc(youtubeEmbedUrl(youtubeId, true));
-                      setPlayerReady(true);
-                    } else {
-                      void startPlayback();
-                    }
-                  }}
-                  className="touch-manipulation rounded-full bg-brand-red px-6 py-3 font-semibold text-white"
-                >
-                  Reintentar
-                </button>
-              </div>
-            )}
           </>
-        ) : (
+        ) : showYoutubeFailed && youtubeId ? (
+          <YoutubeErrorOverlay youtubeId={youtubeId} onRetry={beginPlayback} />
+        ) : showHtml5 ? (
           <>
             <video
               ref={videoRef}
@@ -333,24 +355,22 @@ export function MonetizedVideoPlayer({
               preload="metadata"
               disableRemotePlayback={false}
               x-webkit-airplay="allow"
-              className="h-full w-full"
+              className="absolute inset-0 h-full w-full"
               src={streamUrl}
               title={titulo}
               onTimeUpdate={onVideoTimeUpdate}
-              onError={() => setPlayerError(true)}
+              onPlaying={() => setPlayerReady(true)}
               onCanPlay={() => setPlayerReady(true)}
+              onError={() => setHtml5Error(true)}
             />
-            {playerError && (
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/90 px-4 text-center">
+            {html5Error && (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 px-4 text-center">
                 <p className="text-sm text-brand-muted">
-                  Error al cargar el video. Comprueba tu conexión e intenta de nuevo.
+                  Error al cargar el video. Comprueba tu conexión.
                 </p>
                 <button
                   type="button"
-                  onClick={() => {
-                    setPlayerError(false);
-                    void startHtml5Playback();
-                  }}
+                  onClick={() => void beginPlayback()}
                   className="touch-manipulation rounded-full bg-brand-red px-6 py-3 font-semibold text-white"
                 >
                   Reintentar
@@ -358,8 +378,39 @@ export function MonetizedVideoPlayer({
               </div>
             )}
           </>
-        )}
+        ) : null}
       </div>
     </SplitScreenAdPanel>
+  );
+}
+
+function YoutubeErrorOverlay({
+  youtubeId,
+  onRetry,
+}: {
+  youtubeId: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 px-4 text-center">
+      <p className="text-sm text-brand-muted">
+        No se pudo reproducir aquí. Puede estar bloqueada en tu región.
+      </p>
+      <a
+        href={youtubeWatchUrl(youtubeId)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="touch-manipulation rounded-full bg-brand-red px-6 py-3 font-semibold text-white"
+      >
+        Abrir en YouTube
+      </a>
+      <button
+        type="button"
+        onClick={() => void onRetry()}
+        className="touch-manipulation rounded-full bg-white/10 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/20"
+      >
+        Reintentar
+      </button>
+    </div>
   );
 }
