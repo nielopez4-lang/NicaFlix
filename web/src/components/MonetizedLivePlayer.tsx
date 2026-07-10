@@ -1,9 +1,11 @@
 "use client";
 
 import { CastToTvButton } from "@/components/CastToTvButton";
+import { PlayerErrorBoundary } from "@/components/PlayerErrorBoundary";
 import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
 import { useKeepPlayingDuringMidroll } from "@/hooks/useKeepPlayingDuringMidroll";
 import { useLiveAdTriggers } from "@/hooks/useLiveAdTriggers";
+import { attachLiveHls } from "@/lib/hls-player";
 import {
   isDailyMotionStreamUrl,
   isKnownEmbedUrl,
@@ -24,17 +26,19 @@ function isHlsPlaybackUrl(url: string): boolean {
   );
 }
 
-export function MonetizedLivePlayer({
+function LivePlayerInner({
   streamUrl,
   titulo,
   streamFallbacks = [],
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<import("hls.js").default | null>(null);
+  const hlsRef = useRef<Awaited<ReturnType<typeof attachLiveHls>>>(null);
   const sourceIndexRef = useRef(0);
+  const loadTokenRef = useRef(0);
   const [activeStreamUrl, setActiveStreamUrl] = useState(streamUrl);
   const [hlsLoading, setHlsLoading] = useState(false);
   const [playbackError, setPlaybackError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const sources = useMemo(
     () => [streamUrl, ...streamFallbacks],
@@ -75,8 +79,16 @@ export function MonetizedLivePlayer({
     sourceIndexRef.current = nextIndex;
     setActiveStreamUrl(sources[nextIndex]!);
     setPlaybackError(false);
+    setReloadKey((k) => k + 1);
     return true;
   }, [sources]);
+
+  const restartStream = useCallback(() => {
+    sourceIndexRef.current = 0;
+    setActiveStreamUrl(streamUrl);
+    setPlaybackError(false);
+    setReloadKey((k) => k + 1);
+  }, [streamUrl]);
 
   const startLive = useCallback(() => {
     setPlaybackError(false);
@@ -91,42 +103,46 @@ export function MonetizedLivePlayer({
 
   useEffect(() => {
     if (!isHls || !videoRef.current || !started) return;
+
+    const video = videoRef.current;
+    const loadToken = ++loadTokenRef.current;
     let cancelled = false;
 
-    (async () => {
-      setHlsLoading(true);
-      const Hls = (await import("hls.js")).default;
-      if (!Hls.isSupported() || !videoRef.current || cancelled) {
-        if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
-          videoRef.current.src = activeStreamUrl;
-          void videoRef.current.play().catch(() => undefined);
-        }
-        if (!cancelled) setHlsLoading(false);
-        return;
-      }
+    setHlsLoading(true);
 
-      hlsRef.current?.destroy();
-      const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-      hlsRef.current = hls;
-      hls.loadSource(activeStreamUrl);
-      hls.attachMedia(videoRef.current);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (!cancelled) setHlsLoading(false);
-      });
-
-      hls.on(Hls.Events.ERROR, (_e, data) => {
-        if (!data.fatal) return;
+    void attachLiveHls({
+      url: activeStreamUrl,
+      video,
+      onReady: () => {
+        if (cancelled || loadToken !== loadTokenRef.current) return;
         setHlsLoading(false);
-        hls.destroy();
+      },
+      onNetworkRetry: () => {
+        if (cancelled || loadToken !== loadTokenRef.current) return;
+        setHlsLoading(true);
+      },
+      onFatalError: () => {
+        if (cancelled || loadToken !== loadTokenRef.current) return;
+        setHlsLoading(false);
+        hlsRef.current?.destroy();
         hlsRef.current = null;
-        if (!tryNextSource()) {
-          void videoRef.current?.play().catch(() => undefined);
+        if (!tryNextSource()) setPlaybackError(true);
+      },
+    })
+      .then((hls) => {
+        if (cancelled || loadToken !== loadTokenRef.current) {
+          hls?.destroy();
+          return;
         }
+        hlsRef.current?.destroy();
+        hlsRef.current = hls;
+        void video.play().catch(() => undefined);
+      })
+      .catch(() => {
+        if (cancelled || loadToken !== loadTokenRef.current) return;
+        setHlsLoading(false);
+        if (!tryNextSource()) setPlaybackError(true);
       });
-
-      void videoRef.current.play().catch(() => undefined);
-    })();
 
     return () => {
       cancelled = true;
@@ -134,7 +150,7 @@ export function MonetizedLivePlayer({
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
-  }, [activeStreamUrl, isHls, started, tryNextSource]);
+  }, [activeStreamUrl, isHls, started, tryNextSource, reloadKey]);
 
   const onVideoTimeUpdate = () => {
     const t = videoRef.current?.currentTime;
@@ -169,7 +185,6 @@ export function MonetizedLivePlayer({
         autoPlay={started}
         playsInline
         disableRemotePlayback={false}
-        x-webkit-airplay="allow"
         className="absolute inset-0 h-full w-full bg-black object-contain"
         src={isHls ? undefined : activeStreamUrl}
         title={titulo}
@@ -184,52 +199,53 @@ export function MonetizedLivePlayer({
     </div>
   );
 
-  const playerShell = (
-    <div className="relative aspect-video w-full min-h-[280px]">
-      {!started && !gateOpen ? (
-        <button
-          type="button"
-          onClick={startLive}
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/90 transition hover:bg-black/80"
-          aria-label={`Ver en vivo ${titulo}`}
-        >
-          <span className="mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-brand-red text-3xl shadow-lg">
-            ▶
-          </span>
-          <span className="text-sm font-semibold text-white">Ver en vivo</span>
-          <span className="mt-1 text-xs text-brand-muted">{titulo}</span>
-        </button>
-      ) : null}
-      {playbackError ? (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 p-4 text-center">
-          <p className="text-sm text-brand-muted">
-            No se pudo conectar al canal. Intenta de nuevo.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              sourceIndexRef.current = 0;
-              setActiveStreamUrl(streamUrl);
-              setPlaybackError(false);
-              if (started) void videoRef.current?.play().catch(() => undefined);
-            }}
-            className="rounded-full bg-brand-red px-6 py-2 text-sm font-semibold text-white"
-          >
-            Reintentar
-          </button>
-        </div>
-      ) : null}
-      {playerBody}
-    </div>
-  );
-
   return (
     <SplitScreenAdPanel
       visible={gateOpen}
       kind={gateKind}
       onComplete={completeGate}
     >
-      {playerShell}
+      <div className="relative aspect-video w-full min-h-[280px]">
+        {!started && !gateOpen ? (
+          <button
+            type="button"
+            onClick={startLive}
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/90 transition hover:bg-black/80"
+            aria-label={`Ver en vivo ${titulo}`}
+          >
+            <span className="mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-brand-red text-3xl shadow-lg">
+              ▶
+            </span>
+            <span className="text-sm font-semibold text-white">Ver en vivo</span>
+            <span className="mt-1 text-xs text-brand-muted">{titulo}</span>
+          </button>
+        ) : null}
+        {playbackError ? (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 p-4 text-center">
+            <p className="text-sm text-brand-muted">
+              No se pudo conectar al canal. Intenta de nuevo.
+            </p>
+            <button
+              type="button"
+              onClick={restartStream}
+              className="rounded-full bg-brand-red px-6 py-2 text-sm font-semibold text-white"
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : null}
+        {playerBody}
+      </div>
     </SplitScreenAdPanel>
+  );
+}
+
+export function MonetizedLivePlayer(props: Props) {
+  const [boundaryKey, setBoundaryKey] = useState(0);
+
+  return (
+    <PlayerErrorBoundary onRetry={() => setBoundaryKey((k) => k + 1)}>
+      <LivePlayerInner key={boundaryKey} {...props} />
+    </PlayerErrorBoundary>
   );
 }

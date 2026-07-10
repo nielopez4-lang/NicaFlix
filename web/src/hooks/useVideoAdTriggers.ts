@@ -28,6 +28,11 @@ export function useVideoAdTriggers({
   const [pendingStart, setPendingStart] = useState(false);
 
   const lastMidrollAtSecRef = useRef(0);
+  const gateKindRef = useRef(gateKind);
+  const startedRef = useRef(started);
+
+  gateKindRef.current = gateKind;
+  startedRef.current = started;
 
   const openGate = useCallback((kind: AdGateKind) => {
     setGateKind(kind);
@@ -52,12 +57,12 @@ export function useVideoAdTriggers({
   const completeGate = useCallback(() => {
     setGateOpen(false);
 
-    if (gateKind === "preroll" && !started) {
+    if (gateKindRef.current === "preroll" && !startedRef.current) {
       setStarted(true);
       setPendingStart(true);
       lastMidrollAtSecRef.current = 0;
     }
-  }, [gateKind, started]);
+  }, []);
 
   const consumePendingStart = useCallback(() => {
     const v = pendingStart;
