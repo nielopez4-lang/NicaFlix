@@ -61,9 +61,12 @@ function isHdOrRecent(video: RssVideo, source: string): boolean {
 
 function cleanTitle(title: string): string {
   return title
+    .replace(/\s*PELA?CULA COMPLETA DE [A-ZÁÉÍÓÚÑ]+.*$/i, "")
+    .replace(/\s*NetMovies\s*-?\s*Pel[ií]culas En Espa[nñ]ol.*$/i, "")
     .replace(/\s*[|｜]\s*HD\s*[|｜].*$/i, "")
     .replace(/\s*[|｜]\s*PELICULA COMPLETA.*$/i, "")
     .replace(/\s*[|｜]\s*Pel[ií]cula Completa.*$/i, "")
+    .replace(/\s*[|｜]\s*Pelicula de .*$/i, "")
     .replace(/\s*#\S+/g, "")
     .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
     .replace(/\s+/g, " ")
