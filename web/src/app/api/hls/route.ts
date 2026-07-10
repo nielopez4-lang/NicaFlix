@@ -26,7 +26,11 @@ export async function GET(request: Request) {
           ? "https://www.canal10.com.ni/"
           : target.hostname === "45.171.108.253"
             ? "http://45.171.108.253:8888/"
-            : `${target.origin}/`,
+            : target.hostname === "138.117.4.70"
+              ? "http://138.117.4.70:8075/"
+              : target.hostname.includes("streamingcws30.com")
+                ? "https://streamingcws30.com/"
+                : `${target.origin}/`,
       },
       cache: "no-store",
     });

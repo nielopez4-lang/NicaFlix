@@ -113,27 +113,16 @@ export const canalesNicaragua = [
     id: "ni-canal10",
     nombre: "Canal 10 · Nicaragua",
     red: "Nicaragua",
-    streamUrl: normalizeStreamUrl(
-      "https://d82p4jax9pjrm.cloudfront.net/ts:abr.m3u8",
-    ),
+    streamUrl: "https://www.canal10.com.ni/envivo/",
     pais: "Nicaragua",
     categoria: "Nicaragua",
   },
   {
     id: "ni-canal15",
-    nombre: "Canal 15",
-    red: "Nicaragua",
-    streamUrl:
-      "https://www.dailymotion.com/embed/video/xaka1oy?autoplay=1&ui-start-screen-info=0&queue-enable=0",
-    pais: "Nicaragua",
-    categoria: "Nicaragua",
-  },
-  {
-    id: "ni-cvision",
-    nombre: "Canal Cvisión",
+    nombre: "Canal 15 · Nicaragüense",
     red: "Nicaragua",
     streamUrl: normalizeStreamUrl(
-      "https://stream.cvision.live/cvision_stream.m3u8",
+      "https://cootv.cootel.com.ni:8095/Canal15_CooTel/playlist.m3u8",
     ),
     pais: "Nicaragua",
     categoria: "Nicaragua",
@@ -142,15 +131,9 @@ export const canalesNicaragua = [
     id: "ni-cdnn23",
     nombre: "CDNN 23",
     red: "Nicaragua",
-    streamUrl: "https://cdnn23live.com/",
-    pais: "Nicaragua",
-    categoria: "Nicaragua",
-  },
-  {
-    id: "ni-boaco7",
-    nombre: "Canal 7 Boaco",
-    red: "Nicaragua",
-    streamUrl: normalizeStreamUrl("https://cdn.amixtv.com/c7boaco/index.m3u8"),
+    streamUrl: normalizeStreamUrl(
+      "http://138.117.4.70:8075/channel23/playlist.m3u8",
+    ),
     pais: "Nicaragua",
     categoria: "Nicaragua",
   },
@@ -176,7 +159,7 @@ export const canalesNicaragua = [
   },
   {
     id: "ni-viva13",
-    nombre: "Viva Nicaragua Canal 13",
+    nombre: "Viva Nicaragua · Canal 13",
     red: "Nicaragua",
     streamUrl: normalizeStreamUrl("http://45.171.108.253:8888/VIVA/index.m3u8"),
     pais: "Nicaragua",
@@ -184,7 +167,7 @@ export const canalesNicaragua = [
   },
   {
     id: "ni-wtv20",
-    nombre: "WTV Canal 20",
+    nombre: "WTV · Canal 20",
     red: "Nicaragua",
     streamUrl: normalizeStreamUrl(
       "https://cloudvideo.servers10.com:8081/8130/index.m3u8",

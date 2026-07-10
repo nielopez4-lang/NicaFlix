@@ -180,6 +180,7 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     red: "Nicaragua",
     streamUrl:
       "https://www.dailymotion.com/embed/video/x7rwv8c?autoplay=1&ui-start-screen-info=0&queue-enable=0",
+    streamFallbacks: [normalizeStreamUrl("dailymotion:x7rwv8c")],
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },
@@ -189,6 +190,7 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     red: "Nicaragua",
     streamUrl:
       "https://www.dailymotion.com/embed/video/xaka1oy?autoplay=1&ui-start-screen-info=0&queue-enable=0",
+    streamFallbacks: [normalizeStreamUrl("dailymotion:xaka1oy")],
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },
@@ -196,29 +198,25 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "ni-canal10",
     nombre: "Canal 10 · Nicaragua",
     red: "Nicaragua",
-    streamUrl: normalizeStreamUrl(
-      "https://d82p4jax9pjrm.cloudfront.net/ts:abr.m3u8",
-    ),
-    streamFallbacks: ["https://www.canal10.com.ni/envivo/"],
+    streamUrl: "https://www.canal10.com.ni/envivo/",
+    streamFallbacks: [
+      normalizeStreamUrl("https://d82p4jax9pjrm.cloudfront.net/ts:abr.m3u8"),
+    ],
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },
   {
     id: "ni-canal15",
-    nombre: "Canal 15",
-    red: "Nicaragua",
-    streamUrl:
-      "https://www.dailymotion.com/embed/video/xaka1oy?autoplay=1&ui-start-screen-info=0&queue-enable=0",
-    categoria: "Nicaragua",
-    pais: "Nicaragua",
-  },
-  {
-    id: "ni-cvision",
-    nombre: "Canal Cvisión",
+    nombre: "Canal 15 · Nicaragüense",
     red: "Nicaragua",
     streamUrl: normalizeStreamUrl(
-      "https://stream.cvision.live/cvision_stream.m3u8",
+      "https://cootv.cootel.com.ni:8095/Canal15_CooTel/playlist.m3u8",
     ),
+    streamFallbacks: [
+      normalizeStreamUrl(
+        "http://138.117.4.70:8079/streams/d/CH-15/playlist.m3u8",
+      ),
+    ],
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },
@@ -226,21 +224,8 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "ni-cdnn23",
     nombre: "CDNN 23",
     red: "Nicaragua",
-    streamUrl: "https://cdnn23live.com/",
-    streamFallbacks: [
-      normalizeStreamUrl(
-        "https://cootv.cootel.com.ni:8095/Canal23_CooTel/playlist.m3u8",
-      ),
-    ],
-    categoria: "Nicaragua",
-    pais: "Nicaragua",
-  },
-  {
-    id: "ni-boaco7",
-    nombre: "Canal 7 Boaco",
-    red: "Nicaragua",
     streamUrl: normalizeStreamUrl(
-      "https://cdn.amixtv.com/c7boaco/index.m3u8",
+      "http://138.117.4.70:8075/channel23/playlist.m3u8",
     ),
     categoria: "Nicaragua",
     pais: "Nicaragua",
@@ -267,17 +252,21 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
   },
   {
     id: "ni-viva13",
-    nombre: "Viva Nicaragua Canal 13",
+    nombre: "Viva Nicaragua · Canal 13",
     red: "Nicaragua",
     streamUrl: normalizeStreamUrl(
       "http://45.171.108.253:8888/VIVA/index.m3u8",
     ),
+    streamFallbacks: [
+      "https://www.dailymotion.com/embed/video/x7u200z?autoplay=1&ui-start-screen-info=0&queue-enable=0",
+      normalizeStreamUrl("dailymotion:x7u200z"),
+    ],
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },
   {
     id: "ni-wtv20",
-    nombre: "WTV Canal 20",
+    nombre: "WTV · Canal 20",
     red: "Nicaragua",
     streamUrl: normalizeStreamUrl(
       "https://cloudvideo.servers10.com:8081/8130/index.m3u8",

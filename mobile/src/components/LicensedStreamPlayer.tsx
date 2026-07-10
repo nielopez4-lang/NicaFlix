@@ -19,18 +19,18 @@ function isHlsPlayback(url: string): boolean {
 }
 
 function isKnownEmbedUrl(url: string): boolean {
-  return (
-    url.includes("dailymotion.com/embed/video/") ||
-    /(?:^|\.)youtube\.com$|(?:^|\.)youtu\.be$/.test(
-      (() => {
-        try {
-          return new URL(url).hostname;
-        } catch {
-          return "";
-        }
-      })(),
-    )
-  );
+  try {
+    const { hostname } = new URL(url);
+    if (
+      url.includes("dailymotion.com/embed/video/") ||
+      /(?:^|\.)youtube\.com$|(?:^|\.)youtu\.be$/.test(hostname)
+    ) {
+      return true;
+    }
+    return hostname === "www.canal10.com.ni" || hostname === "canal10.com.ni";
+  } catch {
+    return false;
+  }
 }
 
 function isEmbedPage(url: string): boolean {

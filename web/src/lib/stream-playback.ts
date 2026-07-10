@@ -20,9 +20,15 @@ export function isKnownEmbedUrl(url: string): boolean {
   if (isDailyMotionEmbedUrl(url)) return true;
   try {
     const { hostname } = new URL(url);
-    return /(?:^|\.)dailymotion\.com$|(?:^|\.)youtube\.com$|(?:^|\.)youtu\.be$/.test(
-      hostname,
-    );
+    if (
+      /(?:^|\.)dailymotion\.com$|(?:^|\.)youtube\.com$|(?:^|\.)youtu\.be$/.test(
+        hostname,
+      )
+    ) {
+      return true;
+    }
+    // Señal oficial Canal 10 (player web embebible).
+    return hostname === "www.canal10.com.ni" || hostname === "canal10.com.ni";
   } catch {
     return false;
   }
