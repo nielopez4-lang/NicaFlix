@@ -1,7 +1,10 @@
 import { fetchFullCatalog } from "@/lib/catalog";
 import { AdSlot } from "@/components/AdSlot";
 import { MonetizedVideoPlayer } from "@/components/MonetizedVideoPlayer";
+import { PlayerErrorBoundary } from "@/components/PlayerErrorBoundary";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -25,15 +28,27 @@ export default async function VerPage({ params }: Props) {
           Central de Películas - TERROR &amp; HORROR · YouTube HD · {item.anio} · Español
         </p>
       )}
+      {item.fuente === "archive" && (
+        <p className="mt-2 text-sm text-brand-muted">
+          Internet Archive · Dominio público · {item.categoria}
+        </p>
+      )}
+      {item.fuente === "jikan" && (
+        <p className="mt-2 text-sm text-brand-muted">
+          Tráiler oficial · MyAnimeList
+        </p>
+      )}
       <p className="mt-4 text-brand-muted">{item.sinopsis}</p>
 
       <div className="mt-6 overflow-hidden rounded-2xl">
-        <MonetizedVideoPlayer
-          streamUrl={item.streamUrl}
-          youtubeId={item.youtubeId}
-          titulo={item.titulo}
-          portada={item.portada}
-        />
+        <PlayerErrorBoundary>
+          <MonetizedVideoPlayer
+            streamUrl={item.streamUrl}
+            youtubeId={item.youtubeId}
+            titulo={item.titulo}
+            portada={item.portada}
+          />
+        </PlayerErrorBoundary>
       </div>
 
       <AdSlot slot="PLAYER_BOTTOM" className="my-8" />

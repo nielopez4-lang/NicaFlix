@@ -60,7 +60,13 @@ export default function PlayerScreen() {
           <YouTubePlayer youtubeId={item.youtubeId} />
         ) : item.streamUrl ? (
           <LicensedStreamPlayer streamUrl={item.streamUrl} titulo={item.titulo} />
-        ) : null}
+        ) : (
+          <View style={styles.unavailable}>
+            <Text style={styles.unavailableText}>
+              Reproductor no disponible para este título.
+            </Text>
+          </View>
+        )}
         {started ? (
           <CastToTvButton
             titulo={item.titulo}
@@ -88,6 +94,14 @@ const styles = StyleSheet.create({
   },
   playIcon: { color: "#fff", fontSize: 48 },
   playText: { color: "#8B8B9A", marginTop: 8 },
+  unavailable: {
+    aspectRatio: 16 / 9,
+    backgroundColor: "#12121a",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+  },
+  unavailableText: { color: "#8B8B9A", textAlign: "center" },
   center: { flex: 1, backgroundColor: "#0B0B0F", alignItems: "center", justifyContent: "center" },
   error: { color: "#fff" },
   info: { padding: 16 },

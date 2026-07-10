@@ -21,7 +21,9 @@ export async function fetchFullCatalog(): Promise<ContentItem[]> {
     fetchArchiveCatalog(),
     fetchJikanAnime(),
   ]);
-  return [...filmrise, ...horrorCentral, ...archive, ...anime];
+  return [...filmrise, ...horrorCentral, ...archive, ...anime].filter(
+    (item) => Boolean(item.youtubeId || item.streamUrl),
+  );
 }
 
 export function buildCatalogStats(catalogo: ContentItem[]): CatalogResponse["stats"] {

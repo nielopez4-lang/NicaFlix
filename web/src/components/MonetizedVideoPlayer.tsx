@@ -24,6 +24,7 @@ declare global {
           events?: {
             onReady?: (e: { target: YtPlayer }) => void;
             onStateChange?: (e: { data: number; target: YtPlayer }) => void;
+            onError?: (e: { data: number }) => void;
           };
         },
       ) => YtPlayer;
@@ -139,6 +140,10 @@ export function MonetizedVideoPlayer({
               startYtPositionPoll();
             }
           },
+          onError: () => {
+            setPlayerError(true);
+            setPlayerReady(false);
+          },
         },
       });
       return true;
@@ -240,7 +245,10 @@ export function MonetizedVideoPlayer({
               </div>
             )}
             {playerError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/90">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/90 px-4 text-center">
+                <p className="text-sm text-brand-muted">
+                  No se pudo reproducir en YouTube. Prueba de nuevo.
+                </p>
                 <button
                   type="button"
                   onClick={() => {
@@ -249,7 +257,7 @@ export function MonetizedVideoPlayer({
                   }}
                   className="rounded-full bg-brand-red px-6 py-3 font-semibold text-white"
                 >
-                  Reproducir
+                  Reintentar
                 </button>
               </div>
             )}
@@ -266,9 +274,13 @@ export function MonetizedVideoPlayer({
               src={streamUrl}
               title={titulo}
               onTimeUpdate={onVideoTimeUpdate}
+              onError={() => setPlayerError(true)}
             />
             {playerError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/90">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/90 px-4 text-center">
+                <p className="text-sm text-brand-muted">
+                  Error al cargar el video. Comprueba tu conexión e intenta de nuevo.
+                </p>
                 <button
                   type="button"
                   onClick={() => {
@@ -277,7 +289,7 @@ export function MonetizedVideoPlayer({
                   }}
                   className="rounded-full bg-brand-red px-6 py-3 font-semibold text-white"
                 >
-                  Reproducir
+                  Reintentar
                 </button>
               </div>
             )}
