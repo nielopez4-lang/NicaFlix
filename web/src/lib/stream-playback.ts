@@ -28,6 +28,9 @@ export function isKnownEmbedUrl(url: string): boolean {
   }
 }
 
+/** Dominios HTTPS que deben pasar por /api/hls (CORS en el navegador). */
+const FORCE_PROXY_HOSTS = ["canal.mediaserver.com.co"];
+
 /** Dominios donde HTTP→HTTPS directo funciona (sin proxy). */
 const HTTPS_UPGRADE_HOSTS = ["canal.mediaserver.com.co"];
 
@@ -56,7 +59,18 @@ function isStreamResource(url: string): boolean {
   );
 }
 
-/** URL reproducible en HTTPS (web + app). HTTP → proxy /api/hls. */
+function shouldUseHlsProxy(url: string): boolean {
+  if (!isStreamResource(url)) return false;
+  try {
+    const { protocol, hostname } = new URL(url);
+    if (protocol === "http:") return true;
+    return FORCE_PROXY_HOSTS.includes(hostname);
+  } catch {
+    return false;
+  }
+}
+
+/** URL reproducible en HTTPS (web + app). HTTP / CORS → proxy /api/hls. */
 export function toPlaybackStreamUrl(
   streamUrl: string,
   origin: string = SITE_URL,
@@ -77,6 +91,13 @@ export function toPlaybackStreamUrl(
   if (!streamUrl.startsWith("http")) return streamUrl;
 
   const upgraded = upgradeToHttps(streamUrl);
+  const playbackTarget = upgraded.startsWith("http") ? upgraded : streamUrl;
+
+  if (shouldUseHlsProxy(streamUrl) || shouldUseHlsProxy(upgraded)) {
+    const base = origin.replace(/\/$/, "");
+    return `${base}/api/hls?url=${encodeURIComponent(playbackTarget)}`;
+  }
+
   if (upgraded.startsWith("https://")) return upgraded;
 
   if (!isStreamResource(streamUrl)) return streamUrl;

@@ -6,6 +6,7 @@ const WEB_URL =
   "https://web-five-plum-og6kinpc9v.vercel.app";
 
 const HTTPS_UPGRADE_HOSTS = ["canal.mediaserver.com.co"];
+const FORCE_PROXY_HOSTS = ["canal.mediaserver.com.co"];
 
 function upgradeToHttps(url: string): string {
   try {
@@ -39,7 +40,18 @@ function isStreamResource(url: string): boolean {
   );
 }
 
-/** Misma lógica que web: HTTP / DailyMotion → APIs en el servidor NicaFlix. */
+function shouldUseHlsProxy(url: string): boolean {
+  if (!isStreamResource(url)) return false;
+  try {
+    const { protocol, hostname } = new URL(url);
+    if (protocol === "http:") return true;
+    return FORCE_PROXY_HOSTS.includes(hostname);
+  } catch {
+    return false;
+  }
+}
+
+/** Misma lógica que web: HTTP / CORS → proxy /api/hls en el servidor NicaFlix. */
 export function normalizeStreamUrl(streamUrl: string): string {
   if (streamUrl.startsWith(DAILYMOTION_EMBED_PREFIX)) {
     return toDailyMotionEmbedUrl(
@@ -56,6 +68,13 @@ export function normalizeStreamUrl(streamUrl: string): string {
   if (!streamUrl.startsWith("http")) return streamUrl;
 
   const upgraded = upgradeToHttps(streamUrl);
+  const playbackTarget = upgraded.startsWith("http") ? upgraded : streamUrl;
+
+  if (shouldUseHlsProxy(streamUrl) || shouldUseHlsProxy(upgraded)) {
+    const base = WEB_URL.replace(/\/$/, "");
+    return `${base}/api/hls?url=${encodeURIComponent(playbackTarget)}`;
+  }
+
   if (upgraded.startsWith("https://")) return upgraded;
 
   if (!isStreamResource(streamUrl)) return streamUrl;

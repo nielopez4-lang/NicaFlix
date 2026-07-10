@@ -123,12 +123,15 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
   },
   {
     id: "co-55",
-    nombre: "Canal 55 Telemorisco",
-    red: "Canal 55 · Telemorisco TV",
+    nombre: "Canal 55 · Telemorisco",
+    red: "Telemorisco TV",
     streamUrl: normalizeStreamUrl(
       "https://canal.mediaserver.com.co/live/telemorisco.m3u8",
     ),
-    categoria: "Entretenimiento",
+    streamFallbacks: [
+      normalizeStreamUrl("http://canal.mediaserver.com.co/live/telemorisco.m3u8"),
+    ],
+    categoria: "Colombia",
     pais: "Colombia",
   },
   {

@@ -4,13 +4,13 @@ import { normalizeStreamUrl } from "@/lib/stream-playback";
 export const canalesNicaragua = [
   {
     id: "co-55",
-    nombre: "Canal 55 Telemorisco",
-    red: "Canal 55 · Telemorisco TV",
+    nombre: "Canal 55 · Telemorisco",
+    red: "Telemorisco TV",
     streamUrl: normalizeStreamUrl(
       "https://canal.mediaserver.com.co/live/telemorisco.m3u8",
     ),
     pais: "Colombia",
-    categoria: "Entretenimiento",
+    categoria: "Colombia",
   },
   {
     id: "do-teleantillas10",
