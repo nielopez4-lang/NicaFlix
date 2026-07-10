@@ -93,11 +93,11 @@ export function SplitScreenAdPanel({
 
   return (
     <div
-      className="flex aspect-video w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-black sm:flex-row"
+      className="flex aspect-video w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-black max-sm:min-h-0 sm:flex-row"
       role="region"
       aria-label="Anuncio — preparando reproducción"
     >
-      <div className="relative flex min-h-[180px] min-w-0 flex-1 bg-black">
+      <div className="relative flex min-h-[200px] min-w-0 flex-1 bg-black max-sm:min-h-[180px]">
         {children}
       </div>
       <aside className="flex min-h-[180px] min-w-0 flex-1 flex-col border-t border-white/10 bg-[#0f0f14] sm:border-l sm:border-t-0">
@@ -120,7 +120,7 @@ export function SplitScreenAdPanel({
             type="button"
             disabled={!prerollReady}
             onClick={onComplete}
-            className="w-full rounded-xl bg-brand-red px-6 py-3 font-semibold text-white transition enabled:hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full touch-manipulation rounded-xl bg-brand-red px-6 py-3 font-semibold text-white transition enabled:hover:bg-red-600 enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {prerollReady ? "Comenzar a ver" : `Espera ${seconds}s`}
           </button>

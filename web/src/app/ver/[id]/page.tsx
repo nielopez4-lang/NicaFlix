@@ -45,7 +45,7 @@ export default async function VerPage({ params }: Props) {
       )}
       <p className="mt-4 text-brand-muted">{item.sinopsis}</p>
 
-      <div className="mt-6 overflow-hidden rounded-2xl">
+      <div className="mt-6 aspect-video w-full overflow-hidden rounded-2xl bg-black">
         <PlayerErrorBoundary>
           <MonetizedVideoPlayer
             streamUrl={item.streamUrl}
