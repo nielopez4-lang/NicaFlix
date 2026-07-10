@@ -34,6 +34,7 @@ export function MonetizedLivePlayer({
   const sourceIndexRef = useRef(0);
   const [activeStreamUrl, setActiveStreamUrl] = useState(streamUrl);
   const [hlsLoading, setHlsLoading] = useState(false);
+  const [playbackError, setPlaybackError] = useState(false);
 
   const sources = useMemo(
     () => [streamUrl, ...streamFallbacks],
@@ -62,17 +63,23 @@ export function MonetizedLivePlayer({
   useEffect(() => {
     sourceIndexRef.current = 0;
     setActiveStreamUrl(streamUrl);
+    setPlaybackError(false);
   }, [streamUrl]);
 
   const tryNextSource = useCallback(() => {
     const nextIndex = sourceIndexRef.current + 1;
-    if (nextIndex >= sources.length) return false;
+    if (nextIndex >= sources.length) {
+      setPlaybackError(true);
+      return false;
+    }
     sourceIndexRef.current = nextIndex;
     setActiveStreamUrl(sources[nextIndex]!);
+    setPlaybackError(false);
     return true;
   }, [sources]);
 
-  useEffect(() => {
+  const startLive = useCallback(() => {
+    setPlaybackError(false);
     requestPreroll();
   }, [requestPreroll]);
 
@@ -137,7 +144,7 @@ export function MonetizedLivePlayer({
   };
 
   const playerBody = isEmbedPage ? (
-    <div className="relative aspect-video w-full min-h-[280px]">
+    <div className="relative h-full min-h-[280px] w-full">
       <CastToTvButton titulo={titulo} streamUrl={activeStreamUrl} visible={started} />
       <iframe
         title={titulo}
@@ -149,7 +156,7 @@ export function MonetizedLivePlayer({
       />
     </div>
   ) : (
-    <div className="relative aspect-video w-full min-h-[280px]">
+    <div className="relative h-full min-h-[280px] w-full">
       <CastToTvButton
         titulo={titulo}
         streamUrl={activeStreamUrl}
@@ -177,13 +184,52 @@ export function MonetizedLivePlayer({
     </div>
   );
 
+  const playerShell = (
+    <div className="relative aspect-video w-full min-h-[280px]">
+      {!started && !gateOpen ? (
+        <button
+          type="button"
+          onClick={startLive}
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/90 transition hover:bg-black/80"
+          aria-label={`Ver en vivo ${titulo}`}
+        >
+          <span className="mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-brand-red text-3xl shadow-lg">
+            ▶
+          </span>
+          <span className="text-sm font-semibold text-white">Ver en vivo</span>
+          <span className="mt-1 text-xs text-brand-muted">{titulo}</span>
+        </button>
+      ) : null}
+      {playbackError ? (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 p-4 text-center">
+          <p className="text-sm text-brand-muted">
+            No se pudo conectar al canal. Intenta de nuevo.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              sourceIndexRef.current = 0;
+              setActiveStreamUrl(streamUrl);
+              setPlaybackError(false);
+              if (started) void videoRef.current?.play().catch(() => undefined);
+            }}
+            className="rounded-full bg-brand-red px-6 py-2 text-sm font-semibold text-white"
+          >
+            Reintentar
+          </button>
+        </div>
+      ) : null}
+      {playerBody}
+    </div>
+  );
+
   return (
     <SplitScreenAdPanel
       visible={gateOpen}
       kind={gateKind}
       onComplete={completeGate}
     >
-      {playerBody}
+      {playerShell}
     </SplitScreenAdPanel>
   );
 }

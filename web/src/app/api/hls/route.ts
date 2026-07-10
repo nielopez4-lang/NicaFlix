@@ -24,7 +24,9 @@ export async function GET(request: Request) {
         Accept: "*/*",
         Referer: target.hostname.includes("cloudfront.net")
           ? "https://www.canal10.com.ni/"
-          : `${target.origin}/`,
+          : target.hostname === "45.171.108.253"
+            ? "http://45.171.108.253:8888/"
+            : `${target.origin}/`,
       },
       cache: "no-store",
     });
