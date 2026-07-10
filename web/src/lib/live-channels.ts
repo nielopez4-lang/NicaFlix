@@ -62,6 +62,16 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     pais: "México",
   },
   {
+    id: "cl-mlb",
+    nombre: "MLB En Vivo · Strike Zone",
+    red: "MLB",
+    streamUrl: normalizeStreamUrl(
+      "http://23.237.104.106:8080/USA_MLB_STRIKE_ZONE/index.m3u8",
+    ),
+    categoria: "Clásicos",
+    pais: "EE.UU.",
+  },
+  {
     id: "mx-canal8",
     nombre: "Canal 8 La Paz",
     red: "Canal 8",
@@ -136,9 +146,11 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "do-coral39",
     nombre: "Coral Canal 39",
     red: "Grupo Corripio",
-    streamUrl: normalizeStreamUrl(
-      "http://190.110.36.254:80/CORAL39/index.m3u8",
-    ),
+    streamUrl:
+      "https://www.dailymotion.com/embed/video/x84nyz2?autoplay=1&ui-start-screen-info=0&queue-enable=0",
+    streamFallbacks: [
+      "https://www.televisiondominicanaenvivo.com/coral-39-en-vivo/",
+    ],
     categoria: "República Dominicana",
     pais: "Rep. Dominicana",
   },
@@ -276,15 +288,6 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
 /** Deportes curados */
 export const CURATED_SPORTS_CHANNELS: CuratedLiveChannel[] = [
   {
-    id: "dep-mlb",
-    nombre: "MLB Strike Zone",
-    streamUrl: normalizeStreamUrl(
-      "http://23.237.104.106:8080/USA_MLB_STRIKE_ZONE/index.m3u8",
-    ),
-    categoria: "Deportes",
-    pais: "EE.UU.",
-  },
-  {
     id: "dep-fox",
     nombre: "Fox Deportes",
     streamUrl: normalizeStreamUrl(
@@ -325,6 +328,7 @@ export const CURATED_SPORTS_CHANNELS: CuratedLiveChannel[] = [
 export function inferChannelNetwork(nombre: string): string | undefined {
   const n = nombre.toLowerCase();
   if (/el chavo|chespirito/.test(n)) return "Chespirito · El Chavo TV";
+  if (/mlb|strike zone|baseball|beisbol/.test(n)) return "MLB";
   if (
     /las estrellas|canal 5|distrito comedia|tlnovelas|foro tv|unicable|golden|de pel[ií]cula/.test(
       n,

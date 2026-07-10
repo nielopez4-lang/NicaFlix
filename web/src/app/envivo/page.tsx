@@ -29,7 +29,7 @@ export default async function EnVivoPage() {
     <main className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="text-4xl font-bold">TV en vivo</h1>
       <p className="mt-2 text-brand-muted">
-        El Chavo del 8, Televisa, Canal 8, TV Azteca y más — Nicaragua, LATAM y EE.UU.
+        El Chavo del 8, Televisa, MLB Strike Zone, Canal 8, TV Azteca y más — Nicaragua, LATAM y EE.UU.
       </p>
 
       <AdSlot slot="ENVIVO_TOP" className="my-8" />

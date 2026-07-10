@@ -69,7 +69,7 @@ export default function EnVivoScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scroll}>
       <Text style={styles.hint}>
-        {lives.length} canales — El Chavo, Televisa, Canal 8, LATAM y EE.UU.
+        {lives.length} canales — El Chavo, Televisa, MLB, LATAM y EE.UU.
       </Text>
       {clasicos.length > 0 && (
         <>

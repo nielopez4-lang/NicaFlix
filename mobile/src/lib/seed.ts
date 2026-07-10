@@ -26,9 +26,8 @@ export const canalesNicaragua = [
     id: "do-coral39",
     nombre: "Coral Canal 39",
     red: "Grupo Corripio",
-    streamUrl: normalizeStreamUrl(
-      "http://190.110.36.254:80/CORAL39/index.m3u8",
-    ),
+    streamUrl:
+      "https://www.dailymotion.com/embed/video/x84nyz2?autoplay=1&ui-start-screen-info=0&queue-enable=0",
     pais: "Rep. Dominicana",
     categoria: "República Dominicana",
   },
@@ -61,6 +60,26 @@ export const canalesNicaragua = [
     ),
     pais: "México",
     categoria: "Entretenimiento",
+  },
+  {
+    id: "mx-tlnovelas",
+    nombre: "Tlnovelas",
+    red: "Televisa",
+    streamUrl: normalizeStreamUrl(
+      "http://177.234.249.135:8888/Telenovelas/index.m3u8",
+    ),
+    pais: "México",
+    categoria: "Clásicos",
+  },
+  {
+    id: "cl-mlb",
+    nombre: "MLB En Vivo · Strike Zone",
+    red: "MLB",
+    streamUrl: normalizeStreamUrl(
+      "http://23.237.104.106:8080/USA_MLB_STRIKE_ZONE/index.m3u8",
+    ),
+    pais: "EE.UU.",
+    categoria: "Clásicos",
   },
   {
     id: "ni-tn8",
@@ -176,14 +195,6 @@ export const canalesNicaragua = [
 ];
 
 export const deportesSeed = [
-  {
-    id: "dep-mlb",
-    nombre: "MLB Strike Zone",
-    streamUrl: normalizeStreamUrl(
-      "http://23.237.104.106:8080/USA_MLB_STRIKE_ZONE/index.m3u8",
-    ),
-    pais: "EE.UU.",
-  },
   {
     id: "dep-fox",
     nombre: "Fox Deportes",
