@@ -5,8 +5,8 @@ import { SplitScreenAdPanel } from "@/components/SplitScreenAdPanel";
 import { useKeepPlayingDuringMidroll } from "@/hooks/useKeepPlayingDuringMidroll";
 import { useLiveAdTriggers } from "@/hooks/useLiveAdTriggers";
 import {
-  isDailyMotionEmbedUrl,
   isDailyMotionStreamUrl,
+  isKnownEmbedUrl,
 } from "@/lib/stream-playback";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -33,6 +33,7 @@ export function MonetizedLivePlayer({
   const hlsRef = useRef<import("hls.js").default | null>(null);
   const sourceIndexRef = useRef(0);
   const [activeStreamUrl, setActiveStreamUrl] = useState(streamUrl);
+  const [hlsLoading, setHlsLoading] = useState(false);
 
   const sources = useMemo(
     () => [streamUrl, ...streamFallbacks],
@@ -40,11 +41,7 @@ export function MonetizedLivePlayer({
   );
 
   const isHls = isHlsPlaybackUrl(activeStreamUrl);
-  const isEmbedPage =
-    isDailyMotionEmbedUrl(activeStreamUrl) ||
-    (!isHls &&
-      !activeStreamUrl.match(/\.mp4|\.mpd/i) &&
-      !isDailyMotionStreamUrl(activeStreamUrl));
+  const isEmbedPage = isKnownEmbedUrl(activeStreamUrl);
 
   const {
     watchPositionRef,
@@ -90,12 +87,14 @@ export function MonetizedLivePlayer({
     let cancelled = false;
 
     (async () => {
+      setHlsLoading(true);
       const Hls = (await import("hls.js")).default;
       if (!Hls.isSupported() || !videoRef.current || cancelled) {
         if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
           videoRef.current.src = activeStreamUrl;
           void videoRef.current.play().catch(() => undefined);
         }
+        if (!cancelled) setHlsLoading(false);
         return;
       }
 
@@ -105,8 +104,13 @@ export function MonetizedLivePlayer({
       hls.loadSource(activeStreamUrl);
       hls.attachMedia(videoRef.current);
 
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (!cancelled) setHlsLoading(false);
+      });
+
       hls.on(Hls.Events.ERROR, (_e, data) => {
         if (!data.fatal) return;
+        setHlsLoading(false);
         hls.destroy();
         hlsRef.current = null;
         if (!tryNextSource()) {
@@ -119,6 +123,7 @@ export function MonetizedLivePlayer({
 
     return () => {
       cancelled = true;
+      setHlsLoading(false);
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
@@ -162,7 +167,13 @@ export function MonetizedLivePlayer({
         src={isHls ? undefined : activeStreamUrl}
         title={titulo}
         onTimeUpdate={onVideoTimeUpdate}
+        onPlaying={() => setHlsLoading(false)}
       />
+      {hlsLoading ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+          <span className="h-10 w-10 animate-spin rounded-full border-2 border-brand-red border-t-transparent" />
+        </div>
+      ) : null}
     </div>
   );
 

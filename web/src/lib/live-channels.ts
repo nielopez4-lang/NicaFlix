@@ -133,12 +133,18 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
   },
   {
     id: "do-teleantillas10",
-    nombre: "Tele Antillas Canal 10",
-    red: "Grupo Corripio",
-    streamUrl: normalizeStreamUrl(
-      "http://45.171.108.253:8888/TELEANTILLAS/index.m3u8",
-    ),
-    streamFallbacks: ["https://teleantillas.com.do/en-vivo/"],
+    nombre: "Tele Antillas · Canal 10",
+    red: "Grupo Corripio · Rep. Dominicana",
+    streamUrl:
+      "https://www.dailymotion.com/embed/video/x8mwmvs?autoplay=1&ui-start-screen-info=0&queue-enable=0",
+    streamFallbacks: [
+      normalizeStreamUrl(
+        "http://45.171.108.253:8888/TELEANTILLAS/index.m3u8",
+      ),
+      normalizeStreamUrl(
+        "http://190.122.104.210:5080/LiveApp/streams/C6ngUWmvwMhliYPN3668193473821155.m3u8",
+      ),
+    ],
     categoria: "República Dominicana",
     pais: "Rep. Dominicana",
   },
@@ -187,7 +193,7 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
   },
   {
     id: "ni-canal10",
-    nombre: "Canal 10",
+    nombre: "Canal 10 · Nicaragua",
     red: "Nicaragua",
     streamUrl: normalizeStreamUrl(
       "https://d82p4jax9pjrm.cloudfront.net/ts:abr.m3u8",

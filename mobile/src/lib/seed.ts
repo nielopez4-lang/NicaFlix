@@ -14,11 +14,10 @@ export const canalesNicaragua = [
   },
   {
     id: "do-teleantillas10",
-    nombre: "Tele Antillas Canal 10",
-    red: "Grupo Corripio",
-    streamUrl: normalizeStreamUrl(
-      "http://45.171.108.253:8888/TELEANTILLAS/index.m3u8",
-    ),
+    nombre: "Tele Antillas · Canal 10",
+    red: "Grupo Corripio · Rep. Dominicana",
+    streamUrl:
+      "https://www.dailymotion.com/embed/video/x8mwmvs?autoplay=1&ui-start-screen-info=0&queue-enable=0",
     pais: "Rep. Dominicana",
     categoria: "República Dominicana",
   },
@@ -111,7 +110,7 @@ export const canalesNicaragua = [
   },
   {
     id: "ni-canal10",
-    nombre: "Canal 10",
+    nombre: "Canal 10 · Nicaragua",
     red: "Nicaragua",
     streamUrl: normalizeStreamUrl(
       "https://d82p4jax9pjrm.cloudfront.net/ts:abr.m3u8",

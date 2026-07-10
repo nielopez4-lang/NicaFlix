@@ -18,11 +18,23 @@ function isHlsPlayback(url: string): boolean {
   );
 }
 
-function isEmbedPage(url: string): boolean {
+function isKnownEmbedUrl(url: string): boolean {
   return (
     url.includes("dailymotion.com/embed/video/") ||
-    (!isDirectMedia(url) && !isHlsPlayback(url))
+    /(?:^|\.)youtube\.com$|(?:^|\.)youtu\.be$/.test(
+      (() => {
+        try {
+          return new URL(url).hostname;
+        } catch {
+          return "";
+        }
+      })(),
+    )
   );
+}
+
+function isEmbedPage(url: string): boolean {
+  return isKnownEmbedUrl(url);
 }
 
 /**

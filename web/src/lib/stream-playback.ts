@@ -15,6 +15,19 @@ export {
   isDailyMotionStreamUrl,
 };
 
+/** Solo URLs embebibles en iframe (evita páginas web que bloquean embed). */
+export function isKnownEmbedUrl(url: string): boolean {
+  if (isDailyMotionEmbedUrl(url)) return true;
+  try {
+    const { hostname } = new URL(url);
+    return /(?:^|\.)dailymotion\.com$|(?:^|\.)youtube\.com$|(?:^|\.)youtu\.be$/.test(
+      hostname,
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** Dominios donde HTTP→HTTPS directo funciona (sin proxy). */
 const HTTPS_UPGRADE_HOSTS = ["canal.mediaserver.com.co"];
 
