@@ -298,6 +298,14 @@ function LivePlayerInner({
             <p className="text-sm text-brand-muted">
               No se pudo conectar al canal. Prueba reintentar o abrir la señal
               oficial.
+              {streamUrl.includes("canal10.com.ni") ||
+              activeStreamUrl.includes("canal10.com.ni") ||
+              streamUrl.includes("cloudfront.net") ? (
+                <>
+                  {" "}
+                  Canal 10 puede estar geo-bloqueado fuera de Nicaragua.
+                </>
+              ) : null}
             </p>
             {isCanal10Embed(activeStreamUrl) || streamUrl === CANAL10_HLS ? (
               <a

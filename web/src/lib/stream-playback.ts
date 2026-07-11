@@ -127,6 +127,19 @@ export function pickLiveStreamForDevice(
 ): string {
   const sources = [streamUrl, ...fallbacks];
   if (!mobile) return streamUrl;
+
+  const isCanal10Ni = sources.some(
+    (u) =>
+      u.includes("canal10.com.ni") ||
+      u.includes("d82p4jax9pjrm.cloudfront.net"),
+  );
+
+  // Canal 10 Nicaragua: en móvil el iframe oficial suele funcionar mejor que HLS bloqueado.
+  if (isCanal10Ni) {
+    const official = sources.find((u) => u.includes("canal10.com.ni"));
+    if (official) return official;
+  }
+
   const hlsFirst = sources.find(
     (u) =>
       u.includes(".m3u8") ||

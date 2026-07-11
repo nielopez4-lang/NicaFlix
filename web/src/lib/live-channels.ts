@@ -7,6 +7,13 @@ export const CANAL10_HLS =
 
 export const CANAL10_OFFICIAL = "https://www.canal10.com.ni/envivo/";
 
+/** Viva Nicaragua · Canal 13 — playlist de media directa (IPTV-org / Famelack). */
+export const VIVA13_HLS =
+  "http://45.171.108.253:8888/VIVA/tracks-v1a1/mono.m3u8";
+
+export const VIVA13_HLS_MASTER =
+  "http://45.171.108.253:8888/VIVA/index.m3u8";
+
 /** Señal El Chavo TV (Famelack / IPTV-org) — playlist de media directa. */
 export const CHAVO_HLS =
   "https://live20.bozztv.com/giatvplayout7/giatv-211465/tracks-v1a1/mono.ts.m3u8";
@@ -221,11 +228,9 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "ni-canal10",
     nombre: "Canal 10 · Nicaragua",
     red: "Nicaragua",
-    streamUrl: CANAL10_HLS,
-    streamFallbacks: [
-      normalizeStreamUrl(CANAL10_HLS),
-      CANAL10_OFFICIAL,
-    ],
+    /** Sitio oficial primero (CloudFront HLS devuelve 403 fuera de la señal autorizada). */
+    streamUrl: CANAL10_OFFICIAL,
+    streamFallbacks: [CANAL10_HLS],
     categoria: "Nicaragua",
     pais: "Nicaragua",
   },
@@ -278,12 +283,10 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "ni-viva13",
     nombre: "Viva Nicaragua · Canal 13",
     red: "Nicaragua",
-    streamUrl: normalizeStreamUrl(
-      "http://45.171.108.253:8888/VIVA/index.m3u8",
-    ),
+    streamUrl: normalizeStreamUrl(VIVA13_HLS),
     streamFallbacks: [
-      "https://www.dailymotion.com/embed/video/x7u200z?autoplay=1&ui-start-screen-info=0&queue-enable=0",
-      normalizeStreamUrl("dailymotion:x7u200z"),
+      normalizeStreamUrl(VIVA13_HLS_MASTER),
+      "https://www.dailymotion.com/embed/video/x7u200z?autoplay=1&ui-start-screen-info=0&queue-enable=0&playsinline=1",
     ],
     categoria: "Nicaragua",
     pais: "Nicaragua",
