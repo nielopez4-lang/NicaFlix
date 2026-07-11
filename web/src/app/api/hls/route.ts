@@ -24,9 +24,13 @@ export async function GET(request: Request) {
         Accept: "*/*",
         Referer: target.hostname.includes("cloudfront.net")
           ? "https://www.canal10.com.ni/"
+          : target.hostname === "live20.bozztv.com"
+            ? "https://live20.bozztv.com/"
           : target.hostname === "45.171.108.253"
             ? "http://45.171.108.253:8888/"
-            : target.hostname === "138.117.4.70"
+            : target.hostname === "190.122.104.210"
+              ? "http://190.122.104.210:5080/"
+              : target.hostname === "138.117.4.70"
               ? "http://138.117.4.70:8075/"
               : target.hostname.includes("streamingcws30.com")
                 ? "https://streamingcws30.com/"

@@ -15,7 +15,6 @@ export {
   isDailyMotionStreamUrl,
 };
 
-/** Solo URLs embebibles en iframe (evita páginas web que bloquean embed). */
 export function isKnownEmbedUrl(url: string): boolean {
   if (isDailyMotionEmbedUrl(url)) return true;
   try {
@@ -27,15 +26,19 @@ export function isKnownEmbedUrl(url: string): boolean {
     ) {
       return true;
     }
-    // Señal oficial Canal 10 (player web embebible).
-    return hostname === "www.canal10.com.ni" || hostname === "canal10.com.ni";
+    // Señal oficial Canal 10 Nicaragua (player web embebible).
+    if (hostname === "www.canal10.com.ni" || hostname === "canal10.com.ni") {
+      return true;
+    }
+    // Tele Antillas · Rep. Dominicana (iframe con Dailymotion en su página en vivo).
+    return hostname === "teleantillas.com.do" || hostname === "www.teleantillas.com.do";
   } catch {
     return false;
   }
 }
 
 /** Dominios HTTPS que deben pasar por /api/hls (CORS en el navegador). */
-const FORCE_PROXY_HOSTS = ["canal.mediaserver.com.co"];
+const FORCE_PROXY_HOSTS = ["canal.mediaserver.com.co", "live20.bozztv.com"];
 
 /** Dominios donde HTTP→HTTPS directo funciona (sin proxy). */
 const HTTPS_UPGRADE_HOSTS = ["canal.mediaserver.com.co"];
@@ -114,6 +117,23 @@ export function toPlaybackStreamUrl(
 
 export function normalizeStreamUrl(streamUrl: string): string {
   return toPlaybackStreamUrl(upgradeToHttps(streamUrl));
+}
+
+/** En móvil prioriza HLS/API sobre iframes (Dailymotion embed falla en teléfonos). */
+export function pickLiveStreamForDevice(
+  streamUrl: string,
+  fallbacks: string[] = [],
+  mobile = false,
+): string {
+  const sources = [streamUrl, ...fallbacks];
+  if (!mobile) return streamUrl;
+  const hlsFirst = sources.find(
+    (u) =>
+      u.includes(".m3u8") ||
+      u.includes("/api/hls") ||
+      u.includes("/api/dailymotion"),
+  );
+  return hlsFirst ?? streamUrl;
 }
 
 export function resolveProxyTarget(rawUrl: string): URL | null {

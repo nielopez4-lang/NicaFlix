@@ -1,6 +1,28 @@
 import type { LiveChannel } from "@/types/content";
 import { normalizeStreamUrl } from "@/lib/stream-playback";
 
+/** Señal HLS oficial Canal 10 (CloudFront). Reproducción directa en el navegador del usuario. */
+export const CANAL10_HLS =
+  "https://d82p4jax9pjrm.cloudfront.net/ts:abr.m3u8";
+
+export const CANAL10_OFFICIAL = "https://www.canal10.com.ni/envivo/";
+
+/** Señal El Chavo TV (Famelack / IPTV-org) — playlist de media directa. */
+export const CHAVO_HLS =
+  "https://live20.bozztv.com/giatvplayout7/giatv-211465/tracks-v1a1/mono.ts.m3u8";
+
+export const CHAVO_HLS_MASTER =
+  "https://live20.bozztv.com/giatvplayout7/giatv-211465/playlist.m3u8";
+
+/** Distrito Comedia — segundo canal con programación Chespirito (Famelack). */
+export const DISTRITO_COMEDIA_HLS =
+  "http://177.234.249.135:8888/DistritoComedia/index.m3u8";
+/** Señal en vivo oficial Tele Antillas (Canal 10 · Rep. Dominicana). */
+export const TELEANTILLAS_DM = "x8mwmvs";
+export const TELEANTILLAS_OFFICIAL = "https://teleantillas.com.do/en-vivo/";
+export const TELEANTILLAS_HLS =
+  "http://45.171.108.253:8888/TELEANTILLAS/tracks-v1a1/mono.m3u8";
+
 export type CuratedLiveChannel = Omit<LiveChannel, "id" | "logo"> & {
   /** ID estable para enlaces (/envivo/mx-chavo) */
   id?: string;
@@ -14,10 +36,12 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
   {
     id: "mx-chavo",
     nombre: "El Chavo del 8",
-    red: "El Chavo TV",
-    streamUrl: normalizeStreamUrl(
-      "https://live20.bozztv.com/giatvplayout7/giatv-211465/playlist.m3u8",
-    ),
+    red: "El Chavo TV · Famelack",
+    streamUrl: normalizeStreamUrl(CHAVO_HLS),
+    streamFallbacks: [
+      normalizeStreamUrl(CHAVO_HLS_MASTER),
+      normalizeStreamUrl(DISTRITO_COMEDIA_HLS),
+    ],
     categoria: "Clásicos",
     pais: "México",
   },
@@ -25,9 +49,7 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "mx-comedia",
     nombre: "Distrito Comedia",
     red: "Televisa",
-    streamUrl: normalizeStreamUrl(
-      "http://177.234.249.135:8888/DistritoComedia/index.m3u8",
-    ),
+    streamUrl: normalizeStreamUrl(DISTRITO_COMEDIA_HLS),
     categoria: "Clásicos",
     pais: "México",
   },
@@ -138,13 +160,14 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "do-teleantillas10",
     nombre: "Tele Antillas · Canal 10",
     red: "Grupo Corripio · Rep. Dominicana",
-    streamUrl: normalizeStreamUrl(
-      "http://45.171.108.253:8888/TELEANTILLAS/index.m3u8",
-    ),
+    /** HLS primero: funciona en móvil (embed DM suele fallar en teléfonos). */
+    streamUrl: normalizeStreamUrl(TELEANTILLAS_HLS),
     streamFallbacks: [
       normalizeStreamUrl(
-        "http://190.122.104.210:5080/LiveApp/streams/C6ngUWmvwMhliYPN3668193473821155.m3u8",
+        "http://45.171.108.253:8888/TELEANTILLAS/index.m3u8",
       ),
+      "https://www.dailymotion.com/embed/video/x8mwmvs?autoplay=1&ui-start-screen-info=0&queue-enable=0&playsinline=1",
+      TELEANTILLAS_OFFICIAL,
     ],
     categoria: "República Dominicana",
     pais: "Rep. Dominicana",
@@ -198,9 +221,10 @@ export const CURATED_LIVE_CHANNELS: CuratedLiveChannel[] = [
     id: "ni-canal10",
     nombre: "Canal 10 · Nicaragua",
     red: "Nicaragua",
-    streamUrl: "https://www.canal10.com.ni/envivo/",
+    streamUrl: CANAL10_HLS,
     streamFallbacks: [
-      normalizeStreamUrl("https://d82p4jax9pjrm.cloudfront.net/ts:abr.m3u8"),
+      normalizeStreamUrl(CANAL10_HLS),
+      CANAL10_OFFICIAL,
     ],
     categoria: "Nicaragua",
     pais: "Nicaragua",

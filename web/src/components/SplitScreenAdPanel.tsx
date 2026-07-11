@@ -19,7 +19,7 @@ const MIDROLL_ZONE =
 
 /**
  * Pantalla dividida 50/50 — estilo NBC "Playing Through".
- * Mid-roll cada 15 min: video a la izquierda (sin pausa) + anuncio a la derecha.
+ * Mid-roll cada 10 min: video a la izquierda (sin pausa) + anuncio a la derecha.
  */
 export function SplitScreenAdPanel({
   visible,

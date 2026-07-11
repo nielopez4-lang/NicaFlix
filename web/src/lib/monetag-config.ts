@@ -37,8 +37,8 @@ export const VIDEO_AD = {
   prerollSeconds: 10,
   /** Segundos visibles en mid-roll (estilo NBC Playing Through) */
   midrollDisplaySec: 30,
-  midrollIntervalMs: 15 * 60 * 1000,
-  midrollIntervalSec: 15 * 60,
+  midrollIntervalMs: 10 * 60 * 1000,
+  midrollIntervalSec: 10 * 60,
   midrollCheckMs: 5_000,
 } as const;
 

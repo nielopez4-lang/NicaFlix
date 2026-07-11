@@ -16,7 +16,7 @@ type Options = {
 /**
  * Gatillos Monetag para reproductor universal (YouTube + HTML5).
  * - Pre-roll: pantalla dividida; al completar inicia reproducción.
- * - Mid-roll: cada 15 min, pantalla 50/50 — anuncio + programa sin pausar.
+ * - Mid-roll: cada 10 min, pantalla 50/50 — anuncio + programa sin pausar.
  */
 export function useVideoAdTriggers({
   watchPositionRef,
@@ -70,15 +70,12 @@ export function useVideoAdTriggers({
     return v;
   }, [pendingStart]);
 
-  /** Inicia live sin pre-roll (mid-roll sigue activo cada 15 min). */
+  /** @deprecated Usar requestPreroll — mismo flujo que películas (sin salir de la app). */
   const startLivePlayback = useCallback(() => {
-    setGateOpen(false);
-    setStarted(true);
-    setPendingStart(true);
-    lastMidrollAtSecRef.current = 0;
-  }, []);
+    requestPreroll();
+  }, [requestPreroll]);
 
-  /** Mid-roll cada 15 min — video sigue en la mitad izquierda */
+  /** Mid-roll cada 10 min — video sigue en la mitad izquierda */
   useEffect(() => {
     if (!enabled || !started) return;
 

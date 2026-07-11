@@ -17,7 +17,7 @@ export const canalesNicaragua = [
     nombre: "Tele Antillas · Canal 10",
     red: "Grupo Corripio · Rep. Dominicana",
     streamUrl: normalizeStreamUrl(
-      "http://45.171.108.253:8888/TELEANTILLAS/index.m3u8",
+      "http://45.171.108.253:8888/TELEANTILLAS/tracks-v1a1/mono.m3u8",
     ),
     pais: "Rep. Dominicana",
     categoria: "República Dominicana",
@@ -34,9 +34,9 @@ export const canalesNicaragua = [
   {
     id: "mx-chavo",
     nombre: "El Chavo del 8",
-    red: "El Chavo TV",
+    red: "El Chavo TV · Famelack",
     streamUrl: normalizeStreamUrl(
-      "https://live20.bozztv.com/giatvplayout7/giatv-211465/playlist.m3u8",
+      "https://live20.bozztv.com/giatvplayout7/giatv-211465/tracks-v1a1/mono.ts.m3u8",
     ),
     pais: "México",
     categoria: "Clásicos",
@@ -113,7 +113,7 @@ export const canalesNicaragua = [
     id: "ni-canal10",
     nombre: "Canal 10 · Nicaragua",
     red: "Nicaragua",
-    streamUrl: "https://www.canal10.com.ni/envivo/",
+    streamUrl: "https://d82p4jax9pjrm.cloudfront.net/ts:abr.m3u8",
     pais: "Nicaragua",
     categoria: "Nicaragua",
   },

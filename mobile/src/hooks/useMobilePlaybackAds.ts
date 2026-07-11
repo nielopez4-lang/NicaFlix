@@ -3,7 +3,7 @@ import { VIDEO_AD } from "@/lib/monetag";
 
 export type MobileAdKind = "preroll" | "midroll";
 
-/** Mid-roll cada 15 min — pantalla 50/50, contenido sigue reproduciéndose. */
+/** Mid-roll cada 10 min — pantalla 50/50, contenido sigue reproduciéndose. */
 export function useMobilePlaybackAds(enabled = true) {
   const [started, setStarted] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
@@ -33,13 +33,10 @@ export function useMobilePlaybackAds(enabled = true) {
     }
   }, [started]);
 
-  /** Live: inicia sin pre-roll (solo mid-roll cada 15 min). */
+  /** Live: mismo pre-roll en pantalla dividida que películas. */
   const startLivePlayback = useCallback(() => {
-    setGateOpen(false);
-    setStarted(true);
-    lastMidrollRef.current = 0;
-    elapsedRef.current = 0;
-  }, []);
+    requestPreroll();
+  }, [requestPreroll]);
 
   useEffect(() => {
     if (!enabled || !started) return;

@@ -17,8 +17,8 @@ export const DIRECT_LINK_URL =
 export const VIDEO_AD = {
   prerollSeconds: 10,
   midrollDisplaySec: 30,
-  midrollIntervalMs: 15 * 60 * 1000,
-  midrollIntervalSec: 15 * 60,
+  midrollIntervalMs: 10 * 60 * 1000,
+  midrollIntervalSec: 10 * 60,
 } as const;
 
 export const MONETAG_ZONE_ID =

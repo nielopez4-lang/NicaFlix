@@ -9,7 +9,10 @@ import { attachLiveHls } from "@/lib/hls-player";
 import {
   isDailyMotionStreamUrl,
   isKnownEmbedUrl,
+  pickLiveStreamForDevice,
 } from "@/lib/stream-playback";
+import { CANAL10_HLS, CANAL10_OFFICIAL, TELEANTILLAS_OFFICIAL } from "@/lib/live-channels";
+import { isMobileDevice } from "@/lib/device";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
@@ -19,6 +22,35 @@ type Props = {
 };
 
 const LOAD_TIMEOUT_MS = 12_000;
+
+function isCanal10Embed(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === "www.canal10.com.ni" || hostname === "canal10.com.ni";
+  } catch {
+    return false;
+  }
+}
+
+function isTeleAntillasEmbed(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return (
+      hostname === "teleantillas.com.do" || hostname === "www.teleantillas.com.do"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isTeleAntillasChannel(streamUrl: string, activeStreamUrl: string): boolean {
+  return [streamUrl, activeStreamUrl].some(
+    (u) =>
+      u.includes("dailymotion.com/embed/video/x8mwmvs") ||
+      u.includes("TELEANTILLAS") ||
+      u.includes("teleantillas.com.do"),
+  );
+}
 
 function isHlsPlaybackUrl(url: string): boolean {
   return (
@@ -37,7 +69,18 @@ function LivePlayerInner({
   const hlsRef = useRef<Awaited<ReturnType<typeof attachLiveHls>>>(null);
   const sourceIndexRef = useRef(0);
   const loadTokenRef = useRef(0);
-  const [activeStreamUrl, setActiveStreamUrl] = useState(streamUrl);
+
+  const preferredUrl = useMemo(
+    () =>
+      pickLiveStreamForDevice(
+        streamUrl,
+        streamFallbacks,
+        typeof window !== "undefined" && isMobileDevice(),
+      ),
+    [streamUrl, streamFallbacks],
+  );
+
+  const [activeStreamUrl, setActiveStreamUrl] = useState(preferredUrl);
   const [hlsLoading, setHlsLoading] = useState(false);
   const [playbackError, setPlaybackError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -55,7 +98,7 @@ function LivePlayerInner({
     started,
     gateOpen,
     gateKind,
-    startLivePlayback,
+    requestPreroll,
     completeGate,
     consumePendingStart,
   } = useLiveAdTriggers();
@@ -67,10 +110,11 @@ function LivePlayerInner({
   });
 
   useEffect(() => {
-    sourceIndexRef.current = 0;
-    setActiveStreamUrl(streamUrl);
+    const idx = sources.indexOf(preferredUrl);
+    sourceIndexRef.current = idx >= 0 ? idx : 0;
+    setActiveStreamUrl(preferredUrl);
     setPlaybackError(false);
-  }, [streamUrl]);
+  }, [preferredUrl, sources]);
 
   const tryNextSource = useCallback(() => {
     const nextIndex = sourceIndexRef.current + 1;
@@ -88,17 +132,16 @@ function LivePlayerInner({
 
   const restartStream = useCallback(() => {
     sourceIndexRef.current = 0;
-    setActiveStreamUrl(streamUrl);
+    setActiveStreamUrl(preferredUrl);
     setPlaybackError(false);
     setHlsLoading(false);
     setReloadKey((k) => k + 1);
-  }, [streamUrl]);
+  }, [preferredUrl]);
 
   const startLive = useCallback(() => {
     setPlaybackError(false);
-    setHlsLoading(true);
-    startLivePlayback();
-  }, [startLivePlayback]);
+    requestPreroll();
+  }, [requestPreroll]);
 
   useEffect(() => {
     if (!started) return;
@@ -177,7 +220,26 @@ function LivePlayerInner({
         allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
         referrerPolicy="no-referrer-when-downgrade"
         allowFullScreen
+        scrolling="yes"
       />
+      {started && (isCanal10Embed(activeStreamUrl) || isTeleAntillasEmbed(activeStreamUrl)) ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black via-black/90 to-transparent px-3 pb-3 pt-8 text-center">
+          <p className="pointer-events-auto text-xs text-brand-muted">
+            Si la señal está negra, toca ▶ dentro del reproductor o abre el sitio
+            oficial.
+          </p>
+          <a
+            href={
+              isCanal10Embed(activeStreamUrl) ? CANAL10_OFFICIAL : TELEANTILLAS_OFFICIAL
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto mt-2 inline-block touch-manipulation rounded-full bg-brand-red px-4 py-2 text-xs font-semibold text-white"
+          >
+            {isCanal10Embed(activeStreamUrl) ? "Abrir Canal 10" : "Abrir Tele Antillas"}
+          </a>
+        </div>
+      ) : null}
     </div>
   ) : (
     <div className="relative h-full min-h-[280px] w-full">
@@ -234,8 +296,30 @@ function LivePlayerInner({
         {playbackError ? (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 p-4 text-center">
             <p className="text-sm text-brand-muted">
-              No se pudo conectar al canal. Intenta de nuevo.
+              No se pudo conectar al canal. Prueba reintentar o abrir la señal
+              oficial.
             </p>
+            {isCanal10Embed(activeStreamUrl) || streamUrl === CANAL10_HLS ? (
+              <a
+                href={CANAL10_OFFICIAL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="touch-manipulation rounded-full bg-white/10 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/20"
+              >
+                Abrir en Canal 10
+              </a>
+            ) : null}
+            {isTeleAntillasChannel(streamUrl, activeStreamUrl) ||
+            isTeleAntillasEmbed(activeStreamUrl) ? (
+              <a
+                href={TELEANTILLAS_OFFICIAL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="touch-manipulation rounded-full bg-white/10 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/20"
+              >
+                Abrir en Tele Antillas
+              </a>
+            ) : null}
             <button
               type="button"
               onClick={restartStream}

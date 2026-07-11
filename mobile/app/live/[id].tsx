@@ -1,4 +1,3 @@
-import { AdGateModal } from "@/components/AdGateModal";
 import { CastToTvButton } from "@/components/CastToTvButton";
 import { LicensedStreamPlayer } from "@/components/LicensedStreamPlayer";
 import { SplitScreenAdGate } from "@/components/SplitScreenAdGate";
@@ -10,11 +9,10 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 import type { LiveChannel } from "@/lib/content";
 
 export default function LivePlayerScreen() {
-  const { id, ads } = useLocalSearchParams<{ id: string; ads?: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [canal, setCanal] = useState<LiveChannel | null>(null);
-  const [adDone, setAdDone] = useState(ads !== "1");
   const [loading, setLoading] = useState(true);
-  const { started, gateOpen, gateKind, startLivePlayback, completeGate } =
+  const { started, gateOpen, gateKind, requestPreroll, completeGate } =
     useMobilePlaybackAds();
 
   useEffect(() => {
@@ -38,33 +36,26 @@ export default function LivePlayerScreen() {
   }
 
   return (
-    <>
-      {!adDone && (
-        <AdGateModal visible onClose={() => setAdDone(true)} onSuccess={() => setAdDone(true)} />
-      )}
-      {adDone && (
-        <View style={styles.playerWrap}>
-          <SplitScreenAdGate
-            visible={gateOpen}
-            kind={gateKind}
-            onComplete={completeGate}
-            style={styles.flex}
-          >
-            {started ? (
-              <LicensedStreamPlayer streamUrl={canal.streamUrl} titulo={canal.nombre} />
-            ) : (
-              <Pressable style={styles.placeholder} onPress={startLivePlayback}>
-                <Text style={styles.playIcon}>▶</Text>
-                <Text style={styles.placeholderText}>Ver en vivo</Text>
-              </Pressable>
-            )}
-          </SplitScreenAdGate>
-          {started ? (
-            <CastToTvButton titulo={canal.nombre} streamUrl={canal.streamUrl} />
-          ) : null}
-        </View>
-      )}
-    </>
+    <View style={styles.playerWrap}>
+      <SplitScreenAdGate
+        visible={gateOpen}
+        kind={gateKind}
+        onComplete={completeGate}
+        style={styles.flex}
+      >
+        {started ? (
+          <LicensedStreamPlayer streamUrl={canal.streamUrl} titulo={canal.nombre} />
+        ) : (
+          <Pressable style={styles.placeholder} onPress={requestPreroll}>
+            <Text style={styles.playIcon}>▶</Text>
+            <Text style={styles.placeholderText}>Ver en vivo</Text>
+          </Pressable>
+        )}
+      </SplitScreenAdGate>
+      {started ? (
+        <CastToTvButton titulo={canal.nombre} streamUrl={canal.streamUrl} />
+      ) : null}
+    </View>
   );
 }
 

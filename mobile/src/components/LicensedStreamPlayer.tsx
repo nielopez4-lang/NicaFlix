@@ -27,7 +27,12 @@ function isKnownEmbedUrl(url: string): boolean {
     ) {
       return true;
     }
-    return hostname === "www.canal10.com.ni" || hostname === "canal10.com.ni";
+    return (
+      hostname === "www.canal10.com.ni" ||
+      hostname === "canal10.com.ni" ||
+      hostname === "teleantillas.com.do" ||
+      hostname === "www.teleantillas.com.do"
+    );
   } catch {
     return false;
   }
@@ -48,10 +53,13 @@ export function LicensedStreamPlayer({ streamUrl, titulo }: Props) {
         <WebView
           source={{ uri: streamUrl }}
           allowsFullscreenVideo
+          allowsInlineMediaPlayback
           allowsAirPlayForMediaPlayback
           mediaPlaybackRequiresUserAction={false}
           javaScriptEnabled
           domStorageEnabled
+          mixedContentMode="always"
+          setSupportMultipleWindows={false}
         />
       </View>
     );
@@ -98,9 +106,12 @@ export function LicensedStreamPlayer({ streamUrl, titulo }: Props) {
       <WebView
         source={{ html }}
         allowsFullscreenVideo
+        allowsInlineMediaPlayback
         allowsAirPlayForMediaPlayback
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled
+        mixedContentMode="always"
+        setSupportMultipleWindows={false}
       />
     </View>
   );

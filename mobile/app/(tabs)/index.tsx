@@ -1,10 +1,8 @@
-import { AdGateModal } from "@/components/AdGateModal";
 import { AdBannerSlot } from "@/components/AdBannerSlot";
 import { loadCatalog } from "@/lib/content";
-import { activarPase24h } from "@/lib/verificarAcceso";
 import type { ContentItem } from "@/lib/content";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -30,8 +28,6 @@ export default function InicioScreen() {
   const router = useRouter();
   const [catalogo, setCatalogo] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [adVisible, setAdVisible] = useState(false);
-  const [pendingId, setPendingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadCatalog().then((c) => {
@@ -40,23 +36,9 @@ export default function InicioScreen() {
     });
   }, []);
 
-  const abrirItem = (id: string, esKids = false) => {
-    if (esKids) {
-      router.push(`/player/${id}`);
-      return;
-    }
-    setPendingId(id);
-    setAdVisible(true);
+  const abrirItem = (id: string) => {
+    router.push(`/player/${id}`);
   };
-
-  const onAdSuccess = useCallback(async () => {
-    setAdVisible(false);
-    if (pendingId) {
-      await activarPase24h();
-      router.push(`/player/${pendingId}`);
-      setPendingId(null);
-    }
-  }, [pendingId, router]);
 
   if (loading) {
     return (
@@ -82,7 +64,7 @@ export default function InicioScreen() {
                 {items.map((item) => (
                   <Pressable
                     key={item.id}
-                    onPress={() => abrirItem(item.id, key === "kids")}
+                    onPress={() => abrirItem(item.id)}
                     style={styles.card}
                   >
                     <Image source={{ uri: item.portada }} style={styles.cover} />
@@ -99,7 +81,6 @@ export default function InicioScreen() {
           );
         })}
       </ScrollView>
-      <AdGateModal visible={adVisible} onClose={() => setAdVisible(false)} onSuccess={onAdSuccess} />
     </>
   );
 }
